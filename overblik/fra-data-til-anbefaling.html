@@ -984,7 +984,7 @@ const cv = document.getElementById('stage');
 const pp = document.getElementById('pp'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
 const big = document.getElementById('bigplay'), scenesEl = document.getElementById('scenes');
 let T = 144.2, playing = false, last = 0;
-const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+const fmt = s => { s = Math.max(0, s); return `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`; };   // aldrig negativ tid lige ved start
 SCENES.forEach((s, i) => {
   const b = document.createElement('button'); b.type = 'button';
   b.innerHTML = `${String(i + 1).padStart(2, '0')} · ${fmt(s.t)}<b>${s.title}</b>`;

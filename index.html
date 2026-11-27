@@ -281,16 +281,28 @@ span.chipr{background:#fff;border-style:dashed}
       </button>
     </div>
     <div class="tablist" role="tablist" aria-label="Afsnit">
-      <button class="tab" role="tab" id="t-overblik" aria-controls="overblik" aria-selected="true"><span class="n">1</span>Overblik</button>
-      <button class="tab" role="tab" id="t-trin" aria-controls="trin" aria-selected="false" tabindex="-1"><span class="n">2</span>Sådan gør du</button>
-      <button class="tab" role="tab" id="t-sorter" aria-controls="sorter" aria-selected="false" tabindex="-1"><span class="n">3</span>Sortér</button>
-      <button class="tab" role="tab" id="t-quiz" aria-controls="quiz" aria-selected="false" tabindex="-1"><span class="n">4</span>Quiz</button>
-      <button class="tab" role="tab" id="t-ark" aria-controls="ark" aria-selected="false" tabindex="-1"><span class="n">5</span>Din analyse</button>
+      <button class="tab" role="tab" id="t-semester" aria-controls="semester" aria-selected="false" tabindex="-1"><span class="n">1</span>Semesteroverblik</button>
+      <button class="tab" role="tab" id="t-overblik" aria-controls="overblik" aria-selected="true"><span class="n">2</span>Overblik</button>
+      <button class="tab" role="tab" id="t-trin" aria-controls="trin" aria-selected="false" tabindex="-1"><span class="n">3</span>Sådan gør du</button>
+      <button class="tab" role="tab" id="t-sorter" aria-controls="sorter" aria-selected="false" tabindex="-1"><span class="n">4</span>Sortér</button>
+      <button class="tab" role="tab" id="t-quiz" aria-controls="quiz" aria-selected="false" tabindex="-1"><span class="n">5</span>Quiz</button>
+      <button class="tab" role="tab" id="t-ark" aria-controls="ark" aria-selected="false" tabindex="-1"><span class="n">6</span>Din analyse</button>
     </div>
   </div>
 </nav>
 
 <main class="container">
+<!-- SEMESTEROVERBLIK -->
+<section class="panel" id="semester" role="tabpanel" tabindex="0" aria-labelledby="t-semester" hidden>
+  <div class="ph"><p class="mono kicker">Animation · 2:34 · semestret på ét kort</p><h2>Fra data til anbefaling</h2></div>
+  <div class="stack" style="max-width:900px">
+    <p>Animationen viser, hvor PESTLE hører til i semestret. Den starter ved de strategiske anbefalinger og spørger hele vejen ned: Hvor kommer det fra? Derefter vender den retningen og viser, hvordan fundene fra analyserne bliver til SWOT-punkter, TOWS-alternativer og til sidst anbefalinger. PESTLE ligger yderst, i makromiljøet, og leverer muligheder og trusler.</p>
+    <p class="mono chain"><b>Data</b> → <b>Analyser</b> (intern · mikro · makro) → <b>SWOT</b> → <b>TOWS</b> → <b>Anbefalinger</b></p>
+  </div>
+  <iframe id="fdta" class="anim-frame" src="overblik/fra-data-til-anbefaling.html" title="Animation: Fra data til anbefaling" loading="lazy" allowfullscreen></iframe>
+
+</section>
+
 <!-- OVERBLIK -->
 <section class="panel" id="overblik" role="tabpanel" tabindex="0" aria-labelledby="t-overblik">
   <div class="hero">
@@ -335,14 +347,6 @@ span.chipr{background:#fff;border-style:dashed}
   <div class="stack">
     <aside class="note"><p class="mono">Kort sagt</p><p>PESTLE står for <b>P</b>olitiske, <b>E</b>konomiske (økonomiske), <b>S</b>ociokulturelle, <b>T</b>eknologiske, <b>L</b>egale (juridiske) og <b>E</b>nvironmental (miljømæssige) forhold. Analysen giver dig de <b>muligheder og trusler</b>, du bagefter bruger i fx en SWOT. Værktøjet stammer fra Francis Aguilars "ETPS" fra 1967 og blev senere til PEST og PESTLE.</p></aside>
   </div>
-
-  <h3 class="sec-title">Fra data til anbefaling</h3>
-  <div class="stack" style="max-width:900px">
-    <p class="mono" style="color:var(--burgundy)">Animation · 2:34 · semestret på ét kort</p>
-    <p>Animationen viser, hvor PESTLE hører til i semestret. Den starter ved de strategiske anbefalinger og spørger hele vejen ned: Hvor kommer det fra? Derefter vender den retningen og viser, hvordan fundene fra analyserne bliver til SWOT-punkter, TOWS-alternativer og til sidst anbefalinger. PESTLE ligger yderst, i makromiljøet, og leverer muligheder og trusler.</p>
-    <p class="mono chain"><b>Data</b> → <b>Analyser</b> (intern · mikro · makro) → <b>SWOT</b> → <b>TOWS</b> → <b>Anbefalinger</b></p>
-  </div>
-  <iframe id="fdta" class="anim-frame" src="overblik/fra-data-til-anbefaling.html" title="Animation: Fra data til anbefaling" loading="lazy" allowfullscreen></iframe>
 
   <h3 class="sec-title">De seks faktorer</h3>
   <div class="factors" id="factors"></div>
@@ -529,7 +533,7 @@ const DAY={
   title:'PESTLE, SWOT og TOWS for Living Flowers',
   prep:'Tag jeres prioriterede styrker og svagheder for Living Flowers fra sprint 2 med. De skal bruges i SWOT\'en efter frokost.',
   plan:[
-    {t:'08.30–08.45',title:'Introduktion til dagen',dest:T('overblik'),read:[[T('overblik'),'Dagens mål og program']],ex:[]},
+    {t:'08.30–08.45',title:'Introduktion til dagen',dest:T('overblik'),read:[[T('overblik'),'Dagens mål og program'],[T('semester'),'Semesteroverblik']],ex:[]},
     {t:'08.45–09.15',title:'PESTLE-værkstedet og quiz',dest:T('overblik'),read:[[T('overblik'),'Overblik og de seks faktorer']],ex:[
       {id:'v1',label:'Sortér forholdene (12 forhold)',dest:T('sorter')},
     ]},
