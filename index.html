@@ -338,7 +338,7 @@ span.chipr{background:#fff;border-style:dashed}
   </div>
 
   <div class="stack">
-    <aside class="note"><p class="mono">Kort sagt</p><p>PESTLE står for <b>P</b>olitiske, <b>E</b>konomiske (økonomiske), <b>S</b>ociokulturelle, <b>T</b>eknologiske, <b>L</b>egale (juridiske) og <b>E</b>nvironmental (miljømæssige) forhold. Analysen giver dig de <b>muligheder og trusler</b>, du bagefter bruger i fx en SWOT. Værktøjet stammer fra Francis Aguilars "ETPS" fra 1967 og blev senere til PEST og PESTLE.</p></aside>
+    <aside class="note"><p class="mono">Kort sagt</p><p>PESTLE står for <b>P</b>olitiske, <b>E</b>konomiske (økonomiske), <b>S</b>ociokulturelle, <b>T</b>eknologiske, <b>L</b>ovgivning og <b>E</b>nvironmental (miljømæssige) forhold. Analysen giver dig de <b>muligheder og trusler</b>, du bagefter bruger i fx en SWOT. Værktøjet stammer fra Francis Aguilars "ETPS" fra 1967 og blev senere til PEST og PESTLE.</p></aside>
   </div>
 
   <h3 class="sec-title">De seks faktorer</h3>
@@ -453,7 +453,7 @@ const F = [
  {k:"E",name:"Økonomiske",c:"--fE",what:"Konjunktur, rente, inflation, ledighed, lønudvikling, valutakurser og forbrugernes købekraft og tillid.",q:"Har kunderne råd og lyst til at købe, og hvad sker der med vores omkostninger?",ex:"Stigende renter gør forbrugslån dyrere, så kunderne udskyder store køb som møbler og biler.",mix:"Forveksles med virksomhedens egen økonomi, som er intern og hører til SWOT'ens S og W."},
  {k:"S",name:"Sociokulturelle",c:"--fS",what:"Demografi, livsstil, værdier, trends, uddannelse, sundhed og holdninger til forbrug.",q:"Hvem er kunderne om nogle år, og hvad betyder noget for dem?",ex:"Flere spiser plantebaseret, og andelen af ældre vokser. Begge dele ændrer efterspørgslen.",mix:"Forveksles med T, når en vane handler om teknologi. Spørg: er det selve teknologien (T) eller folks holdning og adfærd (S)?"},
  {k:"T",name:"Teknologiske",c:"--fT",what:"Ny teknologi, digitalisering, AI, automatisering, nye betalingsformer, infrastruktur og kunders adgang til teknologi.",q:"Hvilke teknologier ændrer, hvordan vi producerer, sælger og kommunikerer?",ex:"AI gør det muligt at give personlige produktanbefalinger i en webshop.",mix:"Forveksles med virksomhedens egne IT-systemer, som er interne."},
- {k:"L",name:"Legale",c:"--fL",what:"Gældende love og regler: markedsføringsloven, GDPR, forbrugerbeskyttelse, arbejdsmiljø, licenser og produktkrav.",q:"Hvilke regler skal vi overholde, og hvilke nye regler træder i kraft?",ex:"Markedsføringsloven kræver forudgående samtykke, før man sender reklame på e-mail.",mix:"Forveksles med P. Når en lov er vedtaget og gælder, er den L."},
+ {k:"L",name:"Lovgivning",title:"Lovgivning",c:"--fL",what:"Gældende love og regler: markedsføringsloven, GDPR, forbrugerbeskyttelse, arbejdsmiljø, licenser og produktkrav.",q:"Hvilke regler skal vi overholde, og hvilke nye regler træder i kraft?",ex:"Markedsføringsloven kræver forudgående samtykke, før man sender reklame på e-mail.",mix:"Forveksles med P. Når en lov er vedtaget og gælder, er den L."},
  {k:"E",name:"Miljømæssige",c:"--fM",what:"Klima og vejr, ressourcer, forurening, CO₂, bæredygtighed og krav fra natur og miljø.",q:"Hvordan påvirker klima, ressourcer og miljøkrav vores produkter og forsyning?",ex:"Tørke i producentlandene giver dyrere og mere ustabile leverancer af kaffe og kakao.",mix:"Det andet E. Forbrugernes ønske om grønne produkter er en holdning (S), mens regler om grønne anprisninger er L."}
 ];
 const FI = F.map((f,i)=>({...f,i,label:f.name+" ("+f.k+")"}));
@@ -479,7 +479,7 @@ FI.forEach((f,i)=>{
 
 // faktorkort
 document.getElementById('factors').innerHTML=FI.map(f=>`<article class="fcard" id="f${f.i}" style="--c:${css(f.c)}">
- <div class="fhead"><span class="letter" aria-hidden="true">${f.k}</span><h3>${f.name} forhold</h3></div>
+ <div class="fhead"><span class="letter" aria-hidden="true">${f.k}</span><h3>${f.title||f.name+' forhold'}</h3></div>
  <dl><div><dt>Hvad hører til</dt><dd>${f.what}</dd></div>
  <div><dt>Spørg dig selv</dt><dd>${f.q}</dd></div>
  <div><dt class="ex">Eksempel</dt><dd>${f.ex}</dd></div>
@@ -716,7 +716,7 @@ const Q=[
  {q:"Hvad analyserer en PESTLE?",o:["Makromiljøet: forhold uden for virksomheden, som den ikke selv kan styre","Konkurrencen i branchen","Virksomhedens styrker og svagheder","Kundernes tilfredshed med produktet"],a:0,w:"PESTLE ser på det store billede uden for virksomheden. Konkurrence analyseres fx med Porters Five Forces, og styrker og svagheder i den interne analyse."},
  {q:"En gruppe skriver \"Vi har et stærkt brand\" i deres PESTLE. Hvad er problemet?",o:["Det burde stå under S","Det er et internt forhold og hører til i SWOT'ens styrker","Det er en trussel, ikke en mulighed","Der er ikke noget problem"],a:1,w:"Brand er noget, virksomheden selv har opbygget og kan påvirke. PESTLE handler kun om eksterne forhold."},
  {q:"Hvordan hænger PESTLE og SWOT sammen?",o:["PESTLE erstatter SWOT","PESTLE giver styrker og svagheder til SWOT","PESTLE giver muligheder og trusler til SWOT","De har ikke noget med hinanden at gøre"],a:2,w:"PESTLE er en ekstern analyse. Dens vigtigste fund bliver til O (opportunities) og T (threats) i SWOT'en."},
- {q:"Hvad er forskellen på politiske (P) og legale (L) forhold?",o:["Der er ingen forskel","P er EU, L er Danmark","P er beslutninger, holdninger og stabilitet, der kan ændre vilkårene; L er gældende love og regler, der skal overholdes","P handler om skat, L om alt andet"],a:2,w:"Et lovforslag eller en politisk dagsorden er P. Når loven er vedtaget og gælder, hører den under L. Faktorerne overlapper, så begrund dit valg."},
+ {q:"Hvad er forskellen på politiske forhold (P) og lovgivning (L)?",o:["Der er ingen forskel","P er EU, L er Danmark","P er beslutninger, holdninger og stabilitet, der kan ændre vilkårene; L er gældende love og regler, der skal overholdes","P handler om skat, L om alt andet"],a:2,w:"Et lovforslag eller en politisk dagsorden er P. Når loven er vedtaget og gælder, hører den under L. Faktorerne overlapper, så begrund dit valg."},
  {q:"Hvad er den største svaghed ved en analyse, der kun er en liste over forhold?",o:["Den er for kort","Den mangler fortolkning af, hvad forholdene betyder for virksomheden","Den har for mange kilder","Den bruger forkerte overskrifter"],a:1,w:"Det vigtigste spørgsmål er \"så hvad?\". Hvert forhold skal kobles til virksomheden og vurderes som mulighed eller trussel."},
  {q:"Hvad bør du gøre først, når du laver en PESTLE?",o:["Skrive så mange forhold som muligt","Fastlægge formål, marked og tidshorisont","Lave SWOT'en","Vælge de tre vigtigste trusler"],a:1,w:"Uden afgrænsning bliver analysen bred og generel. Du skal vide, hvilken virksomhed, hvilket marked og hvilken periode du analyserer."},
  {q:"Hvorfor vurderer man sandsynlighed og betydning for hvert forhold?",o:["For at analysen ser mere professionel ud","For at prioritere de få forhold, der kræver handling","Fordi det er et krav i loven","For at kunne udelade miljøfaktorerne"],a:1,w:"Et forhold, der både er sandsynligt og har stor betydning, skal handles på først. Resten holder man øje med."},

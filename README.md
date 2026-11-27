@@ -4,7 +4,7 @@ Interaktiv læringsside om PESTLE-analysen til Markedsføringsøkonom (AK) på E
 
 ## Indhold
 
-- **Overblik** (startsiden) – de seks faktorer (Politiske, Økonomiske, Sociokulturelle, Teknologiske, Legale, Miljømæssige) med "hvad hører til", spørgsmål, eksempler og typiske forvekslinger. Makromiljø-skiven øverst kan klikkes.
+- **Overblik** (startsiden) – de seks faktorer (Politiske, Økonomiske, Sociokulturelle, Teknologiske, Lovgivning, Miljømæssige) med "hvad hører til", spørgsmål, eksempler og typiske forvekslinger. Makromiljø-skiven øverst kan klikkes.
 - **Sådan gør du** – seks trin til en god analyse og de typiske fejl.
 - **Sortér** – 12 forhold, der skal placeres under den rigtige faktor, med forklaring.
 - **Quiz** – 10 spørgsmål om formål, faktorer og sammenhængen med SWOT.
