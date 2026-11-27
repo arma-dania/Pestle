@@ -123,6 +123,14 @@ ol.stops{margin:0;padding-left:22px;display:grid;gap:10px;max-width:72ch}
 /* Indlejret på fanen Overblik: ingen sidemargen, baggrund som SWOT shop */
 body{margin:0;padding:0;background:transparent}
 .note{margin-top:10px;font-size:15px;color:var(--muted)}
+/* Præsentation: hele afspilleren i fuld skærm, scenen så stor som 16:9 tillader */
+.controls .fsbtn{width:auto;padding:0 12px;font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.player.fs{display:flex;flex-direction:column;justify-content:center;align-items:center;width:100vw;height:100vh;border-radius:0;box-shadow:none}
+.player.fs .stagebox{width:min(100vw,calc((100vh - 64px) * 16 / 9));flex:none}
+.player.fs .controls{width:min(100vw,calc((100vh - 64px) * 16 / 9));transition:opacity .3s}
+.player.fs .scenes{display:none}
+.player.fs.idle .controls{opacity:0}
+.player.fs.idle,.player.fs.idle canvas{cursor:none}
 </style>
 </head>
 <body>
@@ -137,10 +145,11 @@ body{margin:0;padding:0;background:transparent}
     <button id="next" type="button" aria-label="Næste scene">▶▶</button>
     <input id="scrub" type="range" min="0" max="154" step="0.05" value="144" aria-label="Tidslinje">
     <span class="time" id="time">2:24 / 2:34</span>
+    <button id="fs" type="button" class="fsbtn" aria-label="Præsentér i fuld skærm" title="Præsentér i fuld skærm (F)">⛶ Præsentér</button>
   </div>
   <div class="scenes" id="scenes"></div>
 </div>
-<p class="note">Klik på scenen for at afspille eller pause. Mellemrum afspiller, og piletasterne springer mellem scenerne. Animationen er uden lyd, og speaken står som undertekster.</p>
+<p class="note">Klik på scenen for at afspille eller pause. Mellemrum afspiller, og piletasterne springer mellem scenerne. Præsentér (eller F) viser animationen i fuld skærm, og Esc afslutter. Animationen er uden lyd, og speaken står som undertekster.</p>
 <!-- Manuskriptet bruges kun til scenebillederne i den fulde version og vises ikke her -->
 <div id="script" hidden></div>
 <script>
@@ -1021,6 +1030,48 @@ cv.addEventListener('keydown', e => {
   else if (e.key === 'ArrowLeft') { e.preventDefault(); jump(-1); }
 });
 window.addEventListener('resize', () => requestAnimationFrame(frame));
+
+// ---------- præsentation i fuld skærm ----------
+(function () {
+  const player = document.getElementById('player'), fsBtn = document.getElementById('fs');
+  const canFS = !!(player.requestFullscreen || player.webkitRequestFullscreen) && (document.fullscreenEnabled || document.webkitFullscreenEnabled);
+  const fsEl = () => document.fullscreenElement || document.webkitFullscreenElement;
+  if (!canFS) {
+    // Fx iPhone: ingen fuld skærm for elementer. Indlejret åbnes animationen alene i en ny fane; ellers skjules knappen.
+    if (window.top !== window.self) { fsBtn.textContent = '↗ Åbn alene'; fsBtn.setAttribute('aria-label', 'Åbn animationen alene i en ny fane'); fsBtn.onclick = () => window.open(location.href, '_blank', 'noopener'); }
+    else fsBtn.hidden = true;
+    return;
+  }
+  const toggleFS = () => {
+    if (fsEl()) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    else (player.requestFullscreen || player.webkitRequestFullscreen).call(player);
+  };
+  let idleT;
+  const wake = () => { player.classList.remove('idle'); clearTimeout(idleT); if (fsEl()) idleT = setTimeout(() => player.classList.add('idle'), 2500); };
+  const onChange = () => {
+    const on = fsEl() === player;
+    player.classList.toggle('fs', on);
+    fsBtn.textContent = on ? '✕ Afslut' : '⛶ Præsentér';
+    fsBtn.setAttribute('aria-label', on ? 'Afslut fuld skærm' : 'Præsentér i fuld skærm');
+    if (on) { cv.focus(); wake(); } else { clearTimeout(idleT); player.classList.remove('idle'); }
+    if (!playing) requestAnimationFrame(frame);   // under afspilning tilpasser den kørende løkke selv størrelsen
+  };
+  document.addEventListener('fullscreenchange', onChange);
+  document.addEventListener('webkitfullscreenchange', onChange);
+  fsBtn.addEventListener('click', toggleFS);
+  player.addEventListener('mousemove', wake);
+  player.addEventListener('focusin', wake);
+  // F skifter fuld skærm. I fuld skærm virker mellemrum og pile, uanset hvilken knap der har fokus.
+  document.addEventListener('keydown', e => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if (e.key === 'f' || e.key === 'F') { e.preventDefault(); toggleFS(); return; }
+    if (!fsEl() || e.target === cv) return;
+    if (e.key === ' ' || e.key === 'k') { e.preventDefault(); toggle(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); jump(1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); jump(-1); }
+    wake();
+  });
+})();
 
 // ---------- manuskript ----------
 const SCRIPT = [
