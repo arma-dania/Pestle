@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fra data til anbefaling</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: én kolonne (maks. 1180 px). Øverst scenen (et mørkt "lysbord" i 16:9), derefter storyboard-manuskript, designforslag og brug i undervisningen. */
+:root{
+  --bg:#eef1f4; --surface:#ffffff; --ink:#1b1f24; --muted:#59626d; --line:#d5d9df; --accent:#2b3a4a;
+  --s:#1d7a4a; --w:#8f5f00; --o:#2a5ca8; --t:#952f60; --gold:#8a6514;
+  --stage:#0f1721; --stage-ink:#e8edf4; --stage-muted:#93a1b3;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --body:Newsreader,Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+
+
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:17px/1.55 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 64px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:clamp(2.3rem,5.6vw,4.4rem);line-height:1;font-weight:700}
+h2{font-size:clamp(1.6rem,3vw,2.3rem);line-height:1.1;font-weight:650}
+h3{font-size:1.15rem;font-weight:650;line-height:1.25}
+p{margin:0}
+.eyebrow{font:500 12px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:1.2rem;max-width:62ch;color:var(--ink)}
+a{color:var(--o)}
+:focus-visible{outline:2px solid var(--o);outline-offset:2px}
+
+header.hero{display:grid;gap:18px;padding-block:44px 26px}
+.hero .chain{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;font:500 13px/1 var(--mono);color:var(--muted)}
+.hero .chain b{font-weight:600;color:var(--ink)}
+.hero .chain .g{color:var(--gold)}
+
+/* Scenen */
+.player{background:var(--stage);border-radius:6px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(10,20,35,.55)}
+.stagebox{position:relative;width:100%;aspect-ratio:16/9;max-width:100%}
+.stagebox canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer}
+.bigplay{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;gap:12px;
+  background:rgba(255,217,138,.95);color:#1b1608;border:0;border-radius:999px;padding:14px 24px 14px 18px;
+  font:600 16px/1 var(--display);cursor:pointer;box-shadow:0 10px 40px rgba(255,217,138,.35)}
+.bigplay svg{width:20px;height:20px}
+.controls{display:flex;align-items:center;gap:12px;padding:10px 14px;color:var(--stage-ink);font:500 13px/1 var(--mono);flex-wrap:wrap}
+.controls button{background:transparent;color:var(--stage-ink);border:1px solid rgba(232,237,244,.28);border-radius:4px;
+  min-height:36px;min-width:40px;padding:0 10px;font:600 13px/1 var(--mono);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.controls button:hover{border-color:rgba(255,217,138,.8)}
+.controls input[type=range]{flex:1;min-width:140px;accent-color:#ffd98a}
+.controls .time{font-variant-numeric:tabular-nums;color:var(--stage-muted);min-width:92px;text-align:right}
+.scenes{display:flex;gap:2px;padding:0 14px 14px;overflow-x:auto}
+.scenes button{flex:1 0 auto;background:rgba(232,237,244,.06);color:var(--stage-muted);border:0;border-top:2px solid transparent;
+  padding:8px 10px 9px;text-align:left;font:500 11px/1.25 var(--mono);letter-spacing:.04em;cursor:pointer;min-width:88px}
+.scenes button b{display:block;color:var(--stage-ink);font:600 13px/1.2 var(--display);letter-spacing:0;margin-top:3px}
+.scenes button.on{border-top-color:#ffd98a;background:rgba(255,217,138,.10)}
+.note{font:400 14px/1.5 var(--body);color:var(--muted);margin-top:10px}
+
+section{padding-top:64px;display:grid;gap:22px}
+.sechead{display:grid;gap:10px;max-width:70ch}
+.idea{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.idea > div{border-top:2px solid var(--ink);padding-top:14px;display:grid;gap:8px;align-content:start}
+.idea .k{font:600 13px/1 var(--mono);color:var(--muted)}
+
+/* Manuskript */
+.scene{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:26px;padding:26px 0;border-top:1px solid var(--line)}
+.scene .thumb{display:grid;gap:10px;align-content:start}
+.scene canvas{width:100%;aspect-ratio:16/9;border-radius:4px;background:var(--stage);display:block;cursor:pointer}
+.scene .tag{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.scene .num{font:700 34px/1 var(--display);color:var(--ink)}
+.scene .tc{font:500 13px/1 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
+.scene .body{display:grid;gap:16px;min-width:0}
+.vo{font:italic 400 1.28rem/1.45 var(--body);border-left:3px solid var(--gold);padding-left:16px;max-width:60ch}
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
+.cols h4{margin:0 0 6px;font:600 11px/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.cols p,.cols li{font-size:15.5px;line-height:1.5}
+.cols ul{margin:0;padding-left:18px}
+.pt{font:500 14px/1.45 var(--body);color:var(--muted)}
+.pt b{color:var(--ink);font-weight:600}
+
+/* Design */
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px;display:grid;gap:12px;align-content:start;min-width:0}
+.sw{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.sw div{border-radius:4px;padding:52px 10px 10px;font:500 12px/1.35 var(--mono);color:#e8edf4;min-height:96px}
+.sw div b{display:block;font:600 14px/1.2 var(--display);margin-bottom:2px}
+.type1{font:700 44px/1 var(--display)}
+.type2{font:italic 400 26px/1.3 var(--body)}
+.type3{font:500 13px/1.3 var(--mono);letter-spacing:.14em;text-transform:uppercase}
+dl.rules{display:grid;grid-template-columns:minmax(0,170px) minmax(0,1fr);gap:10px 18px;margin:0}
+dl.rules dt{font:600 15px/1.35 var(--display)}
+dl.rules dd{margin:0;font-size:15.5px}
+.glyphs{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.glyphs div{display:grid;gap:4px;padding:12px;border:1px solid var(--line);border-radius:4px;background:var(--surface)}
+.glyphs b{font:600 14px/1.2 var(--display)}
+.glyphs span{font-size:14px;color:var(--muted);line-height:1.4}
+table.snd{width:100%;border-collapse:collapse;font-size:15px}
+table.snd th{font:600 11px/1.2 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px 8px 0;border-bottom:1px solid var(--line)}
+table.snd td{padding:9px 10px 9px 0;border-bottom:1px solid var(--line);vertical-align:top}
+.tablewrap{overflow-x:auto}
+ol.stops{margin:0;padding-left:22px;display:grid;gap:10px;max-width:72ch}
+.foot{font-size:14.5px;color:var(--muted);max-width:75ch;display:grid;gap:8px}
+.chipS{color:var(--s)} .chipW{color:var(--w)} .chipO{color:var(--o)} .chipT{color:var(--t)}
+
+@media (max-width:860px){
+  .scene{grid-template-columns:minmax(0,1fr)}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .idea{grid-template-columns:minmax(0,1fr)}
+  .grid2{grid-template-columns:minmax(0,1fr)}
+  dl.rules{grid-template-columns:minmax(0,1fr)}
+  dl.rules dd{margin-bottom:8px}
+}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto} }
+
+:root{color-scheme:light}
+/* Indlejret på fanen Overblik: ingen sidemargen, baggrund som SWOT shop */
+body{margin:0;padding:0;background:transparent}
+.note{margin-top:10px;font-size:15px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="player" id="player">
+  <div class="stagebox">
+    <canvas id="stage" tabindex="0" aria-label="Animation: Fra data til anbefaling. Mellemrum afspiller og pauser, piletasterne skifter scene."></canvas>
+    <button class="bigplay" id="bigplay" type="button"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 3l12 7-12 7z" fill="currentColor"/></svg>Afspil fra start</button>
+  </div>
+  <div class="controls">
+    <button id="pp" type="button" aria-label="Afspil">▶</button>
+    <button id="prev" type="button" aria-label="Forrige scene">◀◀</button>
+    <button id="next" type="button" aria-label="Næste scene">▶▶</button>
+    <input id="scrub" type="range" min="0" max="154" step="0.05" value="144" aria-label="Tidslinje">
+    <span class="time" id="time">2:24 / 2:34</span>
+  </div>
+  <div class="scenes" id="scenes"></div>
+</div>
+<p class="note">Klik på scenen for at afspille eller pause. Mellemrum afspiller, og piletasterne springer mellem scenerne. Animationen er uden lyd, og speaken står som undertekster.</p>
+<!-- Manuskriptet bruges kun til scenebillederne i den fulde version og vises ikke her -->
+<div id="script" hidden></div>
+<script>
+(() => {
+'use strict';
+const SW = 1600, SH = 900, DUR = 154;
+const C = { x: 0, y: 1050 };            // centrum for analyseringene
+const R_CORE = 300, R_MICRO = 640, R_MACRO = 980;
+const COL = { S: '#4cc68a', W: '#e8b04a', O: '#70a6f6', T: '#ec79ab' };
+const GOLD = '#ffd98a', INK = '#e8edf4', MUTED = '#93a1b3', COOL = '#9fc0f2', WARM = '#e8b04a';
+const F = { disp: '"Bricolage Grotesque","Segoe UI",system-ui,sans-serif', body: 'Newsreader,Georgia,serif', mono: '"IBM Plex Mono",ui-monospace,monospace' };
+
+const SCENES = [
+  { t: 0, title: 'Målet', sub: 'strategiske anbefalinger' },
+  { t: 12, title: 'Sporet baglæns', sub: 'hvor kommer de fra?' },
+  { t: 24, title: 'TOWS', sub: 'fra punkter til handlingsalternativer' },
+  { t: 38, title: 'SWOT', sub: 'de prioriterede fund' },
+  { t: 52, title: 'Intern analyse', sub: 'ser ind i virksomheden' },
+  { t: 74, title: 'Mikro', sub: 'kunder og marked' },
+  { t: 100, title: 'Makro', sub: 'PESTLE og konjunktur' },
+  { t: 130, title: 'Sporet forlæns', sub: 'fra fund til anbefaling' },
+  { t: 145, title: 'Slutbillede', sub: '' },
+];
+const SUBS = [
+  [0.8, 5.5, 'Til eksamen skal I give en virksomhed strategiske anbefalinger.'],
+  [5.5, 9, 'Konkrete råd, den kan handle på.'],
+  [9, 12, 'Men en anbefaling er kun så stærk som det, den bygger på.'],
+  [12, 15.5, 'Så lad os gå baglæns.'],
+  [15.5, 20, 'Anbefalingerne kommer fra en TOWS. TOWS kommer fra en SWOT.'],
+  [20, 24, 'Og SWOT’en bygger på jeres analyser, indefra og udefra.'],
+  [24.3, 28.5, 'I TOWS kobler I SWOT’ens punkter to og to.'],
+  [28.5, 32.5, 'En styrke møder en mulighed: match. En svaghed vendes: konvertering.'],
+  [32.5, 38, 'Hvert alternativ vurderes på fem kriterier. Kun de bedste bliver anbefalinger.'],
+  [38.3, 42.5, 'SWOT’en samler fundene fra analyserne.'],
+  [42.5, 47, 'Det, virksomheden selv kan styre, er internt. Det, den kun kan påvirke, er eksternt.'],
+  [47, 52, 'Og I prioriterer. Ikke alle fund er lige vigtige.'],
+  [52.3, 57.5, 'Først kigger I ind i virksomheden. Mission, vision og Golden Circle er målestokken.'],
+  [57.5, 61.6, 'BMC og VPC viser, hvordan virksomheden skaber værdi, og for hvem.'],
+  [61.6, 63.6, 'Værdikæden viser, hvor der er spild.'],
+  [63.6, 67.4, 'VRIO finder de ressourcer, der er svære at kopiere.'],
+  [67.4, 74, 'Regnskabsanalysen viser, om forretningen tjener penge.'],
+  [74.3, 78.5, 'Så kigger I ud. Først tæt på: kunderne og markedet.'],
+  [78.5, 82.5, 'Desk research: det, andre allerede har undersøgt.'],
+  [82.5, 87, 'Interviews giver dybde. De fortæller hvorfor.'],
+  [87, 92, 'Spørgeskemaet giver tal. Det fortæller hvor mange.'],
+  [92, 100, 'Markedsanalysen og Porters 5 Forces viser vækst, segmenter og konkurrence.'],
+  [100.3, 106, 'Længst ude ligger samfundet. PESTLE gennemgår seks områder.'],
+  [106, 111, 'Under E laver I en konjunkturvurdering.'],
+  [111, 115.5, 'Hvor står dansk økonomi nu, målt mod de sidste ti år?'],
+  [115.5, 118.5, 'Hvad siger forventningerne om den nærmeste fremtid?'],
+  [118.5, 122.5, 'Og vigtigst: Hvad betyder det for jeres virksomhed?'],
+  [122.5, 130, 'Under de andre bogstaver tager I kun det med, der rammer branchen og har en konsekvens.'],
+  [130.3, 134.5, 'Nu går vi forlæns.'],
+  [134.5, 138.5, 'Hvert fund får sin plads i SWOT’en.'],
+  [138.5, 141.5, 'De vigtigste kobles i TOWS.'],
+  [141.5, 145, 'De bedste alternativer bliver jeres anbefalinger.'],
+  [145.3, 149.5, 'Kan I ikke pege på, hvor et punkt kommer fra, er det et gæt.'],
+  [149.5, 154, 'Semestrets opgave er at gøre gæt til dokumentation.'],
+];
+
+// Kamera: [t, x, y, zoom]
+const CAM = [
+  [0, 0, -1500, 1.15], [10.5, 0, -1500, 1.15], [14, 0, -1330, 0.8], [19, 0, 160, 0.225], [23.6, 0, 160, 0.225],
+  [26.6, 0, -905, 1.0], [37.6, 0, -905, 1.0], [40.2, 0, -300, 1.05], [51.6, 0, -300, 1.05],
+  [55, 0, 1050, 1.32], [73.6, 0, 1050, 1.32], [77, 0, 1050, 0.68], [82.6, 0, 1050, 0.68], [84.2, -500, 1080, 1.0], [91.8, -500, 1080, 1.0],
+  [93.4, 500, 1080, 1.0], [98.6, 500, 1080, 1.0], [100.4, 0, 1050, 0.62], [102.6, 0, 1050, 0.445], [106, 0, 1050, 0.445], [108.2, 1330, 1050, 1.0], [120.2, 1330, 1050, 1.0],
+  [122.8, 0, 1050, 0.445], [130, 0, 1050, 0.445], [133.2, 450, 160, 0.225], [145, 450, 160, 0.225],
+  [148.6, 0, -1430, 0.95], [154, 0, -1430, 0.95],
+];
+
+// ---------- små hjælpere ----------
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const seg = (t, a, b) => clamp((t - a) / (b - a));
+const lerp = (a, b, u) => a + (b - a) * u;
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eout = x => 1 - Math.pow(1 - x, 3);
+const eback = x => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const vis = (t, a, b = Infinity, fi = .6, fo = .6) => Math.min(seg(t, a, a + fi), b === Infinity ? 1 : 1 - seg(t, b - fo, b));
+function rgba(hex, a) { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; }
+
+let ctx = null, K = 1;
+function withA(a, fn) { if (a <= 0.002) return; const p = ctx.globalAlpha; ctx.globalAlpha = p * Math.min(1, a); fn(); ctx.globalAlpha = p; }
+function font(sz, fam = 'disp', w = 500, it = false) { ctx.font = `${it ? 'italic ' : ''}${w} ${sz}px ${F[fam]}`; }
+const hasLS = () => 'letterSpacing' in ctx;
+function txt(s, x, y, sz, col, o = {}) {
+  font(sz, o.f || 'disp', o.w || 500, o.it); ctx.fillStyle = col; ctx.textAlign = o.al || 'left'; ctx.textBaseline = o.bl || 'alphabetic';
+  if (o.ls && hasLS()) ctx.letterSpacing = o.ls + 'px';
+  ctx.fillText(s, x, y);
+  if (o.ls && hasLS()) ctx.letterSpacing = '0px';
+}
+function caps(s, x, y, sz, col, o = {}) { txt(s.toUpperCase(), x, y, sz, col, Object.assign({ f: 'mono', w: 500, ls: sz * 0.14 }, o)); }
+function tw(s, sz, fam = 'disp', w = 500, it = false) { font(sz, fam, w, it); return ctx.measureText(s).width; }
+function rr(x, y, w, h, r) { r = Math.min(r, w / 2, h / 2); ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function glow(col, b) { ctx.shadowColor = col; ctx.shadowBlur = b * K; }
+function noglow() { ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; }
+function line(pts, col, w, dash) { ctx.beginPath(); pts.forEach((p, i) => i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.setLineDash(dash || []); ctx.stroke(); ctx.setLineDash([]); }
+function circle(x, y, r, fill, stroke, lw) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); if (fill) { ctx.fillStyle = fill; ctx.fill(); } if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 1; ctx.stroke(); } }
+function bez(p0, p1, p2, p3, u) { const v = 1 - u; return [v * v * v * p0[0] + 3 * v * v * u * p1[0] + 3 * v * u * u * p2[0] + u * u * u * p3[0], v * v * v * p0[1] + 3 * v * v * u * p1[1] + 3 * v * u * u * p2[1] + u * u * u * p3[1]]; }
+function curve(p0, p3, prog, col, w, dash, bend = 0.5) {
+  const dy = p3[1] - p0[1]; const p1 = [p0[0], p0[1] + dy * bend], p2 = [p3[0], p3[1] - dy * bend];
+  const n = 40, pts = []; for (let i = 0; i <= n * prog; i++) pts.push(bez(p0, p1, p2, p3, i / n));
+  if (pts.length > 1) line(pts, col, w, dash);
+  return pts[pts.length - 1];
+}
+const typed = (s, u) => s.slice(0, Math.round(s.length * clamp(u)));
+
+// Chip med fund: bogstav, id og tekst. y er midten.
+function chip(x, y, L, id, text, a, al = 'left', sz = 19, sc = 1) {
+  const col = COL[L] || GOLD; const idw = tw(id, sz * .8, 'mono', 600) + 16; const w = tw(text, sz, 'body', 500) + idw + 30; const h = sz * 2.1;
+  const x0 = al === 'left' ? x : al === 'right' ? x - w : x - w / 2;
+  withA(a, () => {
+    ctx.save(); ctx.translate(x0 + w / 2, y); ctx.scale(sc, sc); ctx.translate(-(x0 + w / 2), -y);
+    rr(x0, y - h / 2, w, h, h / 2); ctx.fillStyle = 'rgba(13,20,29,0.94)'; ctx.fill(); ctx.strokeStyle = rgba(col, .75); ctx.lineWidth = 1.5; ctx.stroke();
+    rr(x0 + 6, y - h / 2 + 6, idw, h - 12, (h - 12) / 2); ctx.fillStyle = col; ctx.fill();
+    txt(id, x0 + 6 + idw / 2, y + 1, sz * .8, '#0d141d', { f: 'mono', w: 600, al: 'center', bl: 'middle' });
+    txt(text, x0 + idw + 18, y + 1, sz, INK, { f: 'body', w: 500, bl: 'middle' });
+    ctx.restore();
+  });
+  return { x0, w, h };
+}
+
+// ---------- kamera ----------
+function camAt(t) {
+  let i = 0; while (i < CAM.length - 2 && t >= CAM[i + 1][0]) i++;
+  const a = CAM[i], b = CAM[i + 1]; const u = eio(seg(t, a[0], b[0]));
+  return { x: lerp(a[1], b[1], u), y: lerp(a[2], b[2], u), z: Math.exp(lerp(Math.log(a[3]), Math.log(b[3]), u)) };
+}
+
+// ---------- data ----------
+const REC = { cx: 0, cy: -1500, w: 1040, h: 400 };
+const REC_LINES = [
+  { text: 'Vind erhvervskunderne med 10 års garanti', ref: 'SO', refs: 'S1 + O2' },
+  { text: 'Gør webshoppen til en styrke', ref: 'WO', refs: 'W1 + O1' },
+  { text: 'Tilbyd leasing, når renten stiger', ref: 'ST', refs: 'S3 + T2' },
+];
+const recLineY = i => -1488 + i * 74;
+
+const TW = { x0: -480, hw: 180, cw: 390, y0: -1115, hh: 60, rh: 175 };
+const TCELL = {
+  SO: { x: -300, y: -1055 }, WO: { x: 90, y: -1055 }, ST: { x: -300, y: -880 }, WT: { x: 90, y: -880 },
+};
+const THEAD = { S: [-105, -1078], W: [285, -1078], O: [-390, -967], T: [-390, -792] };
+const TOWS = [
+  { k: 'SO', label: 'SO · Match', refs: ['S1', 'O2'], text: ['Brug 10 års garanti til at', 'vinde erhvervskunderne'], t: 25.0, score: [3, 3, 2, 3, 3], chosen: true, rec: 0 },
+  { k: 'WO', label: 'WO · Konvertering', refs: ['W1', 'O1'], text: ['Ansæt en digital marketing-', 'ansvarlig og løft webshoppen'], t: 27.6, score: [3, 3, 2, 2, 3], chosen: true, rec: 1 },
+  { k: 'ST', label: 'ST · Mød truslen', refs: ['S3', 'T2'], text: ['Brug den stærke økonomi', 'til at tilbyde leasing'], t: 30.2, score: [2, 3, 3, 3, 2], chosen: true, rec: 2 },
+  { k: 'WT', label: 'WT · Reducering', refs: ['W2', 'T1'], text: ['Find en reserveleverandør', 'og kort leveringstiden'], t: 32.6, score: [2, 1, 1, 2, 2], chosen: false },
+];
+
+const SCELL = { S: { x: -380, y: -530 }, W: { x: 0, y: -530 }, O: { x: -380, y: -300 }, T: { x: 0, y: -300 } };
+const SNAME = { S: 'Styrker', W: 'Svagheder', O: 'Muligheder', T: 'Trusler' };
+const SPTS = {
+  S: [['S1', '10 års garanti'], ['S2', 'Holdbarhed 4,8 mod 4,1'], ['S3', 'Soliditet 41 % mod 28 %']],
+  W: [['W1', 'Webshop 12 % mod 35 %'], ['W2', 'Levering 6 uger mod 2']],
+  O: [['O1', '7 af 10 starter købet online'], ['O2', 'Erhvervsladcykler +15 %/år'], ['O3', 'Bilfrie zoner i 4 af 5 byer']],
+  T: [['T1', 'Tysk konkurrent: showroom'], ['T2', 'Stigende rente']],
+};
+const LOWPRI = { S2: 1, O3: 1 };
+function spAnchor(id) { const L = id[0]; const i = SPTS[L].findIndex(p => p[0] === id); const c = SCELL[L]; return [c.x + 46, c.y + 100 + i * 42 - 7]; }
+
+const TILES = [
+  { name: 'BMC', icon: 'bmc' }, { name: 'VPC', icon: 'vpc' }, { name: 'Værdikæde', icon: 'chain' },
+  { name: 'VRIO', icon: 'vrio' }, { name: 'Regnskab', icon: 'fin' }, { name: 'Organisation', icon: 'org' },
+];
+const tilePos = k => { const a = (-90 + 60 * k) * Math.PI / 180; return [C.x + 200 * Math.cos(a), C.y + 200 * Math.sin(a)]; };
+const tileT = k => 58 + k * 1.9;
+const ICH = [
+  { tile: 0, L: 'W', id: 'W1', text: 'Webshop: 12 % af salget mod 35 %', x: 92, y: -262, al: 'left' },
+  { tile: 1, L: 'S', id: 'S2', text: 'Holdbarhed scorer 4,8 mod 4,1', x: 246, y: -130, al: 'left' },
+  { tile: 2, L: 'W', id: 'W2', text: 'Leveringstid 6 uger mod 2', x: 250, y: 72, al: 'left' },
+  { tile: 3, L: 'S', id: 'S1', text: '10 års garanti er svær at efterligne', x: 92, y: 262, al: 'left' },
+  { tile: 4, L: 'S', id: 'S3', text: 'Soliditetsgrad 41 % mod 28 %', x: -250, y: 72, al: 'right' },
+];
+// hvor fundenes mærker hviler efter scenen (absolut)
+const TAGS = {
+  W1: () => { const p = tilePos(0); return [p[0] + 58, p[1] - 38]; },
+  S2: () => { const p = tilePos(1); return [p[0] + 58, p[1] - 38]; },
+  W2: () => { const p = tilePos(2); return [p[0] + 58, p[1] - 38]; },
+  S1: () => { const p = tilePos(3); return [p[0] + 58, p[1] - 38]; },
+  S3: () => { const p = tilePos(4); return [p[0] + 58, p[1] - 38]; },
+  O1: () => [C.x - 330, C.y + 104], O2: () => [C.x + 586, C.y - 178], T1: () => [C.x + 516, C.y + 128],
+  O3: () => [C.x + 46, C.y - 842], T2: () => [1092, 1332],
+};
+const FLIGHT = ['S1', 'O2', 'W1', 'O1', 'S3', 'T2', 'S2', 'W2', 'T1', 'O3'];
+
+const PEST = [
+  { L: 'P', word: 'Politisk', f: ['Afgifter, tilskud og', 'politiske planer'], a: -90, on: 103 },
+  { L: 'E', word: 'Økonomisk', f: ['Konjunkturvurdering:', 'BNP, ledighed, inflation'], a: -30, on: 106.2 },
+  { L: 'S', word: 'Sociokulturel', f: ['Demografi, livsstil', 'og værdier'], a: 30, on: 123 },
+  { L: 'T', word: 'Teknologisk', f: ['Nye produkter,', 'processer og kanaler'], a: 90, on: 124.5 },
+  { L: 'L', word: 'Juridisk', f: ['Love og regler', 'på vej'], a: 150, on: 126 },
+  { L: 'E', word: 'Miljø', f: ['Klimakrav og', 'bæredygtighed'], a: 210, on: 127.5 },
+];
+
+// ---------- baggrund ----------
+function drawBG(cam) {
+  const W = SW * K, H = SH * K;
+  const g = ctx.createRadialGradient(W * .5, H * .42, 0, W * .5, H * .42, W * .78);
+  g.addColorStop(0, '#162231'); g.addColorStop(1, '#0a1017');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const s = 40 * K, ox = ((-cam.x * cam.z * .25 * K) % s + s) % s, oy = ((-cam.y * cam.z * .25 * K) % s + s) % s;
+  ctx.fillStyle = 'rgba(190,208,232,0.07)';
+  for (let x = ox; x < W; x += s) for (let y = oy; y < H; y += s) ctx.fillRect(x, y, 1.2 * K, 1.2 * K);
+}
+
+// ---------- rygraden mellem niveauerne ----------
+function drawSpine(t) {
+  const gh = seg(t, 14.5, 17.5); if (!gh) return;
+  const pulse = vis(t, 131, 145.5, 1, 1);
+  const col = rgba('#c8d6ea', .22 + .25 * pulse);
+  withA(gh, () => {
+    line([[0, -1300], [0, -1115]], col, 2, [6, 10]);
+    line([[0, -705], [0, -575]], col, 2, [6, 10]);
+    line([[0, -70], [0, C.y - R_MACRO]], col, 2, [6, 10]);
+  });
+}
+
+// ---------- 1 · anbefalingerne ----------
+function drawRec(t) {
+  const { cx, cy } = REC;
+  const pt = seg(t, 0.2, 1.4);
+  if (t < 3.2 && pt > 0) withA(1 - seg(t, 2.2, 3.2), () => { glow(GOLD, 50); circle(cx, cy, 6 + 10 * eout(pt), rgba(GOLD, .95)); noglow(); });
+  const u1 = eout(seg(t, 1.4, 2.4)), u2 = eout(seg(t, 2.2, 3.1)); if (u1 <= 0) return;
+  const w = lerp(12, REC.w, u1), h = lerp(4, REC.h, u2);
+  const fin = vis(t, 141.8, 146.5, .5, 1.5) + vis(t, 148, Infinity, 1.2);
+  glow(rgba(GOLD, .55), 30 + 50 * fin);
+  rr(cx - w / 2, cy - h / 2, w, h, 10); ctx.fillStyle = 'rgba(40,34,18,0.55)'; ctx.fill();
+  noglow(); ctx.strokeStyle = rgba(GOLD, .6 + .4 * fin); ctx.lineWidth = 2; ctx.stroke();
+  const ca = seg(t, 3, 3.8);
+  withA(ca, () => {
+    caps('Strategiske anbefalinger', cx - 470, cy - 138, 18, GOLD);
+    caps('Øvelsescase · ladcykler', cx + 470, cy - 138, 15, MUTED, { al: 'right' });
+    txt('Cykelværket ApS', cx - 470, cy - 76, 52, INK, { w: 650 });
+  });
+  REC_LINES.forEach((l, i) => {
+    const t0 = 4 + i * 1.5, y = recLineY(i), u = seg(t, t0, t0 + 1.2);
+    if (u <= 0) return;
+    const hi = vis(t, 141.4 + i * .3, 146, .4, 1.2);
+    if (hi > 0) withA(hi, () => { rr(cx - 490, y - 30, 980, 60, 6); ctx.fillStyle = rgba(GOLD, .16); ctx.fill(); });
+    circle(cx - 452, y, 20, rgba(GOLD, .12), GOLD, 1.6);
+    txt(String(i + 1), cx - 452, y + 1, 20, GOLD, { w: 700, al: 'center', bl: 'middle' });
+    txt(typed(l.text, u), cx - 416, y + 1, 30, INK, { w: 500, bl: 'middle' });
+    const ra = seg(t, t0 + 1.1, t0 + 1.6);
+    withA(ra, () => {
+      const s = `${l.ref} · ${l.refs}`; const w2 = tw(s, 15, 'mono', 500) + 24;
+      rr(cx + 470 - w2, y - 16, w2, 32, 16); ctx.strokeStyle = rgba(GOLD, .55); ctx.lineWidth = 1.2; ctx.stroke();
+      txt(s, cx + 470 - w2 / 2, y + 1, 15, GOLD, { f: 'mono', al: 'center', bl: 'middle' });
+    });
+  });
+  // spørgsmålet
+  withA(vis(t, 9.3, 14, .7, 1), () => txt('Men hvor kommer de fra?', cx, cy + 262, 44, INK, { f: 'body', it: true, w: 400, al: 'center' }));
+  // sporene ned til TOWS
+  REC_LINES.forEach((l, i) => {
+    const p = eio(seg(t, 10.6 + i * .25, 13.8 + i * .25)); if (!p) return;
+    const fade = 1 - .7 * seg(t, 24, 26);
+    const c = TCELL[l.ref]; const tgt = [c.x + 195, c.y];
+    withA(fade, () => { glow(GOLD, 12); curve([cx + 400, recLineY(i) + 17], tgt, p, rgba(GOLD, .8), 2.2, null, .55); noglow(); });
+  });
+}
+
+// ---------- 3 · TOWS ----------
+function drawTows(t) {
+  const gh = seg(t, 15, 17.5); if (!gh) return;
+  const full = seg(t, 24.3, 25.3);
+  const { x0, hw, cw, y0, hh, rh } = TW, W = hw + 2 * cw, H = hh + 2 * rh;
+  withA(gh * (.35 + .65 * full), () => {
+    ctx.strokeStyle = 'rgba(200,214,232,0.35)'; ctx.lineWidth = 1.5;
+    rr(x0, y0, W, H, 8); ctx.stroke();
+    line([[x0 + hw, y0], [x0 + hw, y0 + H]], 'rgba(200,214,232,0.3)', 1.5);
+    line([[x0 + hw + cw, y0], [x0 + hw + cw, y0 + H]], 'rgba(200,214,232,0.3)', 1.5);
+    line([[x0, y0 + hh], [x0 + W, y0 + hh]], 'rgba(200,214,232,0.3)', 1.5);
+    line([[x0, y0 + hh + rh], [x0 + W, y0 + hh + rh]], 'rgba(200,214,232,0.3)', 1.5);
+  });
+  withA(gh * full, () => {
+    caps('TOWS', x0 + hw / 2, y0 + 38, 18, INK, { al: 'center', w: 600 });
+    txt('S · Styrker', THEAD.S[0], THEAD.S[1] + 10, 24, COL.S, { w: 600, al: 'center' });
+    txt('W · Svagheder', THEAD.W[0], THEAD.W[1] + 10, 24, COL.W, { w: 600, al: 'center' });
+    txt('O · Muligheder', THEAD.O[0], THEAD.O[1] + 8, 22, COL.O, { w: 600, al: 'center' });
+    txt('T · Trusler', THEAD.T[0], THEAD.T[1] + 8, 22, COL.T, { w: 600, al: 'center' });
+  });
+  if (t < 24.5) return;
+  const sel = seg(t, 36.6, 37.4);
+  TOWS.forEach((c, ci) => {
+    const cell = TCELL[c.k];
+    const dim = c.chosen ? 1 : 1 - .5 * sel;
+    const flash = c.chosen ? vis(t, 138.6 + ci * .4, 141 + ci * .4, .3, .8) : 0;
+    withA(dim, () => {
+      // kortets ramme
+      const la = seg(t, c.t + .9, c.t + 1.4);
+      if (la > 0) {
+        const gold = c.chosen ? sel : 0;
+        if (gold || flash) glow(GOLD, 16 + 20 * flash);
+        rr(cell.x + 10, cell.y + 10, cw - 20, rh - 20, 8);
+        ctx.fillStyle = `rgba(22,32,45,${.85 * la})`; ctx.fill(); noglow();
+        ctx.strokeStyle = gold || flash ? rgba(GOLD, .4 + .5 * Math.max(gold, flash)) : 'rgba(200,214,232,0.22)'; ctx.lineWidth = 1.5; ctx.stroke();
+        withA(la, () => caps(c.label, cell.x + 26, cell.y + 40, 15, c.k[0] === 'S' ? COL.S : COL.W, { w: 600 }));
+        c.text.forEach((s, j) => txt(typed(s, seg(t, c.t + 1.0 + j * .5, c.t + 1.7 + j * .5)), cell.x + 26, cell.y + 78 + j * 30, 23, INK, { w: 500 }));
+      }
+      // tokens, der glider ind
+      c.refs.forEach((id, j) => {
+        const u = eio(seg(t, c.t + j * .15, c.t + 1.1 + j * .15));
+        const st = THEAD[id[0]], en = [cell.x + cw - 104 + j * 60, cell.y + 34];
+        const x = lerp(st[0], en[0], u), y = lerp(st[1], en[1], u) - 50 * Math.sin(Math.PI * u);
+        const a = seg(t, c.t + j * .15, c.t + .3 + j * .15);
+        withA(a, () => {
+          rr(x - 26, y - 13, 52, 26, 13); ctx.fillStyle = COL[id[0]]; ctx.fill();
+          txt(id, x, y + 1, 14, '#0d141d', { f: 'mono', w: 600, al: 'center', bl: 'middle' });
+        });
+      });
+      // point på fem kriterier
+      let tot = 0;
+      c.score.forEach((s, j) => {
+        const on = seg(t, 35 + j * .25 + ci * .08, 35.2 + j * .25 + ci * .08);
+        if (t > 34.6) for (let d = 0; d < 3; d++) {
+          const filled = d < s && on > 0;
+          circle(cell.x + 30 + j * 46 + d * 11, cell.y + 146, 3.8, filled ? rgba(GOLD, .95) : 'rgba(200,214,232,0.2)');
+        }
+        if (on > 0) tot += s;
+      });
+      if (t > 36.2) withA(seg(t, 36.2, 36.6), () => txt(`${tot}/15`, cell.x + cw - 26, cell.y + 151, 16, c.chosen ? GOLD : MUTED, { f: 'mono', w: 600, al: 'right' }));
+    });
+  });
+  withA(seg(t, 34.6, 35.4), () => {
+    caps('Vurdér på fem kriterier', 0, -664, 15, MUTED, { al: 'center' });
+    txt('Mål · Målgrupper, strategi og værdier · Ressourcer · Vægt · Sammenhæng', 0, -632, 21, INK, { f: 'body', al: 'center' });
+  });
+}
+
+// ---------- 4 · SWOT ----------
+function drawSwot(t) {
+  const gh = seg(t, 15.5, 18); if (!gh) return;
+  const full = seg(t, 38.4, 39.4);
+  withA(gh * (.35 + .65 * full), () => {
+    ['S', 'W', 'O', 'T'].forEach(L => { const c = SCELL[L]; rr(c.x + 4, c.y + 4, 372, 222, 8); ctx.strokeStyle = rgba(COL[L], .45); ctx.lineWidth = 1.5; ctx.stroke(); });
+  });
+  if (t < 38.4) return;
+  withA(full, () => {
+    caps('Positivt', -190, -556, 15, MUTED, { al: 'center' });
+    caps('Negativt', 190, -556, 15, MUTED, { al: 'center' });
+  });
+  const ax = seg(t, 44.4, 45.4);
+  [['Internt', -415, 'kan styres'], ['Eksternt', -185, 'kan påvirkes']].forEach(([s, y, sub]) => {
+    ctx.save(); ctx.translate(-412, y); ctx.rotate(-Math.PI / 2);
+    withA(full, () => caps(s, 0, 0, 16, INK, { al: 'center', w: 600 }));
+    withA(ax, () => txt(sub, 0, -26, 17, MUTED, { f: 'body', it: true, al: 'center' }));
+    ctx.restore();
+  });
+  ['S', 'W', 'O', 'T'].forEach((L, ci) => {
+    const c = SCELL[L]; const a = eout(seg(t, 38.6 + ci * .35, 39.5 + ci * .35));
+    if (!a) return;
+    withA(a, () => {
+      rr(c.x + 4, c.y + 4, 372, 222, 8); ctx.fillStyle = rgba(COL[L], .09); ctx.fill();
+      txt(L, c.x + 24, c.y + 60, 54, COL[L], { w: 700 });
+      txt(SNAME[L], c.x + 70, c.y + 56, 22, INK, { w: 600 });
+    });
+  });
+  let idx = 0;
+  ['S', 'W', 'O', 'T'].forEach(L => {
+    const c = SCELL[L];
+    SPTS[L].forEach(([id, s], i) => {
+      const p = seg(t, 40.4 + idx * .32, 40.9 + idx * .32); idx++;
+      if (!p) return;
+      const dim = LOWPRI[id] ? 1 - .62 * seg(t, 47.4, 48.4) : 1;
+      const fl = vis(t, 134.2 + FLIGHT.indexOf(id) * .3 + 1.6, 136 + FLIGHT.indexOf(id) * .3 + 1.6 + .4, .15, .6);
+      withA(p * dim, () => {
+        const y = c.y + 100 + i * 42;
+        if (fl) { glow(COL[L], 22 * fl); }
+        rr(c.x + 24, y - 20, 44, 26, 13); ctx.fillStyle = COL[L]; ctx.fill(); noglow();
+        txt(id, c.x + 46, y - 6, 14, '#0d141d', { f: 'mono', w: 600, al: 'center', bl: 'middle' });
+        txt(s, c.x + 80, y - 6, 21, INK, { f: 'body', w: 500, bl: 'middle' });
+      });
+    });
+  });
+  withA(seg(t, 47.2, 48), () => txt('Prioritér: S og W efter præstation × vigtighed · O og T efter sandsynlighed × konsekvens', 0, -22, 20, MUTED, { f: 'body', it: true, al: 'center' }));
+}
+
+// ---------- ikoner til den interne analyse ----------
+function icon(kind, x, y, t, t0) {
+  const s = WARM; ctx.strokeStyle = s; ctx.fillStyle = s; ctx.lineWidth = 1.6;
+  const u = seg(t, t0 + .2, t0 + 1.4);
+  if (kind === 'vrio') {
+    'VRIO'.split('').forEach((ch, i) => {
+      const bx = x - 46 + i * 24; rr(bx, y - 14, 20, 24, 3); ctx.stroke();
+      txt(ch, bx + 10, y - 1, 12, INK, { f: 'mono', w: 600, al: 'center', bl: 'middle' });
+      if (u > (i + 1) / 5) circle(bx + 17, y - 14, 4, COL.S);
+    });
+  } else if (kind === 'bmc') {
+    rr(x - 44, y - 18, 88, 36, 2); ctx.stroke();
+    [-26.4, -8.8, 8.8, 26.4].forEach(dx => line([[x + dx, y - 18], [x + dx, y + 8]], s, 1.2));
+    line([[x - 44, y + 8], [x + 44, y + 8]], s, 1.2); line([[x, y + 8], [x, y + 18]], s, 1.2);
+    line([[x - 44, y - 5], [x - 26.4, y - 5]], s, 1); line([[x + 26.4, y - 5], [x + 44, y - 5]], s, 1);
+  } else if (kind === 'vpc') {
+    rr(x - 44, y - 17, 34, 34, 3); ctx.stroke(); circle(x + 27, y, 17, null, s, 1.6);
+    line([[x - 6, y], [x + 6, y]], s, 1.6); line([[x + 2, y - 4], [x + 6, y], [x + 2, y + 4]], s, 1.6);
+  } else if (kind === 'chain') {
+    for (let i = 0; i < 3; i++) line([[x - 44, y - 18 + i * 6], [x + 22, y - 18 + i * 6]], s, 1);
+    ctx.beginPath(); ctx.moveTo(x - 44, y - 2); ctx.lineTo(x + 26, y - 2); ctx.lineTo(x + 44, y + 7); ctx.lineTo(x + 26, y + 16); ctx.lineTo(x - 44, y + 16); ctx.closePath(); ctx.stroke();
+    [-24, -4, 16].forEach(dx => line([[x + dx, y - 2], [x + dx, y + 16]], s, 1));
+  } else if (kind === 'fin') {
+    const h1 = 36 * u, h2 = 25 * u;
+    ctx.fillStyle = COL.S; ctx.fillRect(x - 24, y + 18 - h1, 18, h1);
+    ctx.fillStyle = 'rgba(200,214,232,0.45)'; ctx.fillRect(x + 6, y + 18 - h2, 18, h2);
+    line([[x - 36, y + 18], [x + 36, y + 18]], s, 1.2);
+    withA(u, () => { txt('41', x - 15, y - 24 + (36 - h1), 11, INK, { f: 'mono', al: 'center' }); txt('28', x + 15, y - 13 + (25 - h2), 11, MUTED, { f: 'mono', al: 'center' }); });
+  } else if (kind === 'org') {
+    rr(x - 13, y - 20, 26, 14, 3); ctx.stroke();
+    line([[x, y - 6], [x, y + 1]], s, 1.4); line([[x - 30, y + 1], [x + 30, y + 1]], s, 1.4);
+    [-30, 0, 30].forEach((dx, i) => { line([[x + dx, y + 1], [x + dx, y + 6]], s, 1.4); rr(x + dx - 11, y + 6, 22, 13, 3); if (u > (i + 1) / 4) { ctx.fillStyle = rgba(WARM, .55); ctx.fill(); } ctx.stroke(); });
+  }
+}
+
+// ---------- ringene ----------
+function annulus(r1, r2, fill) { ctx.beginPath(); ctx.arc(C.x, C.y, r2, 0, Math.PI * 2); ctx.arc(C.x, C.y, r1, 0, Math.PI * 2, true); ctx.fillStyle = fill; ctx.fill('evenodd'); }
+function drawRings(t) {
+  const gh = seg(t, 16, 18.5); if (!gh) return;
+  withA(gh, () => {
+    [R_CORE, R_MICRO, R_MACRO].forEach(r => circle(C.x, C.y, r, null, 'rgba(200,214,232,0.22)', 1.5));
+  });
+  // overblikstekster i ringene
+  const ov = Math.max(vis(t, 18.5, 24.5, .8, .8), vis(t, 131.5, 146, 1, 1));
+  withA(ov, () => {
+    txt('Intern', C.x, C.y + 20, 74, rgba(WARM, .95), { w: 650, al: 'center' });
+    txt('Mikro', C.x, C.y - 470 + 30, 74, COOL, { w: 650, al: 'center' });
+    txt('Makro', C.x, C.y - 810 + 30, 74, COOL, { w: 650, al: 'center' });
+  });
+
+  // kerne
+  const core = seg(t, 52.4, 54.4);
+  if (core) withA(core, () => {
+    const g = ctx.createRadialGradient(C.x, C.y, 0, C.x, C.y, R_CORE);
+    g.addColorStop(0, 'rgba(232,176,74,0.20)'); g.addColorStop(1, 'rgba(232,176,74,0.04)');
+    circle(C.x, C.y, R_CORE, g, rgba(WARM, .55), 2);
+  });
+  // mikro
+  const mic = seg(t, 74.4, 76.6);
+  if (mic) withA(mic, () => { annulus(R_CORE, R_MICRO, 'rgba(112,166,246,0.07)'); circle(C.x, C.y, R_MICRO, null, rgba(COL.O, .5), 2); });
+  // makro: seks segmenter
+  PEST.forEach((p, i) => {
+    const u = eout(seg(t, 100.4 + i * .22, 101.5 + i * .22)); if (!u) return;
+    const a0 = (p.a - 29) * Math.PI / 180, a1 = a0 + 58 * u * Math.PI / 180;
+    const act = p.L === 'E' && i === 1 ? vis(t, 106.2, 121.6, .4, .8) : vis(t, p.on, p.on + 1.6, .3, .6);
+    const after = t > p.on ? .5 : 0;
+    ctx.beginPath(); ctx.arc(C.x, C.y, R_MACRO - 4, a0, a1); ctx.arc(C.x, C.y, R_MICRO + 14, a1, a0, true); ctx.closePath();
+    ctx.fillStyle = `rgba(112,166,246,${.05 + .05 * after + .14 * act})`; ctx.fill();
+    ctx.strokeStyle = `rgba(112,166,246,${.35 + .5 * act})`; ctx.lineWidth = 1.5; ctx.stroke();
+  });
+  drawCore(t); drawMicro(t); drawMacro(t);
+}
+
+function drawCore(t) {
+  const dimc = 1 - .55 * vis(t, 75, 130.5, 1.2, 1.2);
+  withA(dimc, () => drawCoreInner(t));
+}
+function drawCoreInner(t) {
+  if (t < 54.8) { drawTags(t, ['S1', 'W1', 'S2', 'W2', 'S3'], false); return; }
+  // golden circle
+  const gc = [[64, 'Hvad'], [44, 'Hvordan'], [24, 'Hvorfor']];
+  gc.forEach(([r, s], i) => {
+    const u = eout(seg(t, 55.2 + i * .35, 56.4 + i * .35)); if (!u) return;
+    ctx.beginPath(); ctx.arc(C.x, C.y, r, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u);
+    ctx.strokeStyle = rgba(WARM, .9); ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = rgba(WARM, .07 * u); ctx.fill();
+  });
+  withA(seg(t, 56.4, 57.2), () => {
+    txt('Hvorfor', C.x, C.y + 1, 12.5, INK, { w: 650, al: 'center', bl: 'middle' });
+    txt('Hvordan', C.x, C.y - 33, 10.5, INK, { w: 500, al: 'center', bl: 'middle' });
+    txt('Hvad', C.x, C.y - 54, 10.5, INK, { w: 500, al: 'center', bl: 'middle' });
+    caps('Målestok', C.x, C.y - 82, 14, WARM, { al: 'center', w: 600 });
+    txt('mission · vision · Golden Circle', C.x, C.y + 92, 15, MUTED, { f: 'body', it: true, al: 'center' });
+  });
+  TILES.forEach((tile, k) => {
+    const t0 = tileT(k), u = seg(t, t0, t0 + .6); if (!u) return;
+    const [x, y] = tilePos(k); const sc = eback(u);
+    ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc); ctx.translate(-x, -y);
+    withA(Math.min(1, u * 1.6), () => {
+      rr(x - 66, y - 46, 132, 92, 8); ctx.fillStyle = 'rgba(20,29,41,0.96)'; ctx.fill(); ctx.strokeStyle = rgba(WARM, .55); ctx.lineWidth = 1.5; ctx.stroke();
+      icon(tile.icon, x, y - 12, t, t0);
+      txt(tile.name, x, y + 33, tile.name.length > 12 ? 13 : 15, INK, { w: 600, al: 'center' });
+    });
+    ctx.restore();
+  });
+  // fund-chips med lederlinjer
+  ICH.forEach(ch => {
+    const t0 = tileT(ch.tile) + .8; const a = seg(t, t0, t0 + .5); if (!a) return;
+    const col = seg(t, 71 + ch.tile * .15, 72.4 + ch.tile * .15); // samles til mærke
+    const [tx, ty] = tilePos(ch.tile); const cx = C.x + ch.x, cy = C.y + ch.y;
+    if (col < 1) {
+      withA(a * (1 - col), () => {
+        const ex = ch.al === 'left' ? cx : cx; line([[tx + (ch.al === 'left' ? 66 : -66), ty], [ex, cy]], rgba(COL[ch.L], .5), 1.2, [3, 4]);
+        chip(cx, cy, ch.L, ch.id, ch.text, 1, ch.al, 19, 1 - .5 * eio(col));
+      });
+    }
+  });
+  drawTags(t, ['S1', 'W1', 'S2', 'W2', 'S3'], true);
+}
+function tagTime(id) {
+  const ic = ICH.find(c => c.id === id); if (ic) return 71.9 + ic.tile * .15;
+  return { O1: 98.8, O2: 99.0, T1: 99.2, O3: 106, T2: 121.8 }[id];
+}
+function drawTags(t, ids) {
+  ids.forEach(id => {
+    const t0 = tagTime(id); const a = seg(t, t0, t0 + .4); if (!a) return;
+    const [x, y] = TAGS[id](); const L = id[0];
+    withA(a, () => { glow(COL[L], 14); circle(x, y, 10, COL[L]); noglow(); txt(id, x + 16, y + 1, 13, COL[L], { f: 'mono', w: 600, bl: 'middle' }); });
+  });
+}
+
+function drawMicro(t) {
+  if (t < 74.6) { drawTags(t, ['O1', 'O2', 'T1']); return; }
+  const X = C.x, Y = C.y;
+  withA(seg(t, 75.4, 76.4), () => {
+    caps('Mikro', X, Y - 500, 24, COOL, { al: 'center', w: 600 });
+    txt('tæt på virksomheden', X, Y - 468, 19, MUTED, { f: 'body', it: true, al: 'center' });
+  });
+  withA(seg(t, 77, 77.8), () => {
+    txt('Kunder', X - 470, Y - 292, 34, INK, { w: 650, al: 'center' });
+    txt('Marked', X + 470, Y - 292, 34, INK, { w: 650, al: 'center' });
+  });
+  // metodebadges
+  const badges = [
+    { x: -210, y: 455, t: 78.6, h: 'Desk research', s: 'rapporter, statistik' },
+    { x: 0, y: 500, t: 79.2, h: 'Kvalitativ', s: 'interviews' },
+    { x: 210, y: 455, t: 79.8, h: 'Kvantitativ', s: 'spørgeskema' },
+  ];
+  badges.forEach(b => {
+    const u = seg(t, b.t, b.t + .5); if (!u) return;
+    withA(u, () => {
+      rr(X + b.x - 92, Y + b.y - 32, 184, 64, 8); ctx.fillStyle = 'rgba(20,29,41,0.96)'; ctx.fill(); ctx.strokeStyle = rgba(COL.O, .6); ctx.lineWidth = 1.5; ctx.stroke();
+      txt(b.h, X + b.x, Y + b.y - 3, 21, INK, { w: 600, al: 'center' });
+      txt(b.s, X + b.x, Y + b.y + 20, 15, MUTED, { f: 'body', it: true, al: 'center' });
+    });
+  });
+  withA(seg(t, 80.4, 81.2), () => {
+    line([[X - 92, Y + 552], [X + 302, Y + 552]], rgba(COL.O, .5), 1.2);
+    caps('Primær dataindsamling', X + 105, Y + 580, 13, MUTED, { al: 'center' });
+    caps('Sekundær', X - 210, Y + 514, 13, MUTED, { al: 'center' });
+  });
+  // desk research: dokumenter flyver til begge halvdele
+  for (let i = 0; i < 6; i++) {
+    const t0 = 79.2 + i * .35, u = eio(seg(t, t0, t0 + 1.2)); if (!u) continue;
+    const left = i % 2 === 0; const tx = X + (left ? -470 : 470) + ((i >> 1) - 1) * 46, ty = Y - 222;
+    const sx = X - 210, sy = Y + 420;
+    const x = lerp(sx, tx, u), y = lerp(sy, ty, u) - 120 * Math.sin(Math.PI * u);
+    withA(1 - seg(t, 84, 85.5), () => {
+      ctx.save(); ctx.translate(x, y); ctx.rotate((left ? -.12 : .12) * (1 - u));
+      rr(-14, -18, 28, 36, 3); ctx.fillStyle = 'rgba(232,237,244,0.92)'; ctx.fill();
+      for (let l = 0; l < 4; l++) line([[-8, -9 + l * 7], [8 - (l === 3 ? 6 : 0), -9 + l * 7]], 'rgba(15,23,33,0.6)', 1.6);
+      ctx.restore();
+    });
+  }
+  // interviews
+  const iv = seg(t, 83.2, 83.8), iv2 = seg(t, 84.4, 85);
+  if (iv) withA(iv, () => {
+    const bx = X - 640, by = Y - 190;
+    rr(bx, by, 280, 46, 16); ctx.fillStyle = 'rgba(232,237,244,0.94)'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(bx + 40, by + 46); ctx.lineTo(bx + 30, by + 62); ctx.lineTo(bx + 58, by + 46); ctx.fill();
+    txt('Hvorfor valgte du en ladcykel?', bx + 140, by + 24, 17, '#16202c', { f: 'body', it: true, al: 'center', bl: 'middle' });
+  });
+  if (iv2) withA(iv2, () => {
+    const bx = X - 560, by = Y - 128;
+    rr(bx, by, 250, 46, 16); ctx.fillStyle = rgba(COL.O, .9); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(bx + 210, by + 46); ctx.lineTo(bx + 222, by + 62); ctx.lineTo(bx + 190, by + 46); ctx.fill();
+    txt('Den skal holde i mange år.', bx + 125, by + 24, 17, '#0d141d', { f: 'body', it: true, w: 500, al: 'center', bl: 'middle' });
+  });
+  withA(seg(t, 85, 85.6), () => txt('Interviews · dybde: hvorfor?', X - 470, Y - 36, 19, MUTED, { f: 'body', al: 'center' }));
+  // spørgeskema: 20 prikker, 14 af dem starter online
+  if (t > 87.6) {
+    withA(seg(t, 87.6, 88.2), () => txt('Spørgeskema · tal: hvor mange?', X - 470, Y + 52, 19, MUTED, { f: 'body', al: 'center' }));
+    const col = seg(t, 89.6, 90.4);
+    for (let i = 0; i < 20; i++) {
+      const r = Math.floor(i / 10), c = i % 10; const t0 = 88 + i * .06; const u = eout(seg(t, t0, t0 + .5)); if (!u) continue;
+      const x = X - 587 + c * 26, y = Y + 88 + r * 28 - 50 * (1 - u);
+      const on = c < 7 && col > 0;
+      withA(u, () => circle(x, y, 9, on ? rgba(COL.O, .35 + .65 * col) : 'rgba(200,214,232,0.35)'));
+    }
+  }
+  // markedsanalyse: vækst
+  if (t > 92.2) {
+    withA(seg(t, 92.2, 92.8), () => {
+      txt('Markedsanalyse · størrelse, vækst, segmenter', X + 470, Y - 236, 18, MUTED, { f: 'body', al: 'center' });
+      line([[X + 360, Y - 196], [X + 360, Y - 62], [X + 600, Y - 62]], 'rgba(200,214,232,0.45)', 1.4);
+    });
+    const u = seg(t, 92.6, 94); const pts = [];
+    for (let i = 0; i <= 40 * u; i++) { const xx = i / 40; pts.push([X + 370 + xx * 216, Y - 76 - 102 * Math.pow(xx, 1.6)]); }
+    if (pts.length > 1) { glow(COL.O, 10); line(pts, COL.O, 3); noglow(); }
+  }
+  // Porters 5 Forces
+  if (t > 95.4) {
+    const fx = X + 450, fy = Y + 150;
+    withA(seg(t, 95.4, 96), () => txt('Porters 5 Forces', fx, fy - 108, 19, MUTED, { f: 'body', al: 'center' }));
+    const nodes = [[0, 0, 'Rivalisering', 1], [0, -58, 'Nye aktører'], [0, 58, 'Substitutter'], [-122, 0, 'Leverandører'], [122, 0, 'Kunder']];
+    nodes.forEach((n, i) => {
+      const u = seg(t, 95.6 + i * .22, 96.1 + i * .22); if (!u) return;
+      withA(u, () => {
+        if (i) line([[fx, fy], [fx + n[0] * .55, fy + n[1] * .55]], 'rgba(200,214,232,0.35)', 1.2);
+        const w = tw(n[2], 16, 'disp', 600) + 22;
+        rr(fx + n[0] - w / 2, fy + n[1] - 16, w, 32, 16);
+        ctx.fillStyle = n[3] ? rgba(COL.T, .9) : 'rgba(20,29,41,0.96)'; ctx.fill();
+        ctx.strokeStyle = n[3] ? rgba(COL.T, 1) : rgba(COL.O, .55); ctx.lineWidth = 1.3; ctx.stroke();
+        txt(n[2], fx + n[0], fy + n[1] + 1, 16, n[3] ? '#0d141d' : INK, { w: 600, al: 'center', bl: 'middle' });
+      });
+    });
+  }
+  // fundene
+  const mch = [
+    { id: 'O1', L: 'O', text: '7 af 10 begynder købet online', x: -470, y: 168, t: 90.4 },
+    { id: 'O2', L: 'O', text: 'Erhvervsladcykler vokser 15 % om året', x: 470, y: -18, t: 94.2 },
+    { id: 'T1', L: 'T', text: 'Tysk konkurrent åbner showroom i Kbh.', x: 400, y: 288, t: 97.4 },
+  ];
+  mch.forEach(c => {
+    const a = seg(t, c.t, c.t + .5); const col = seg(t, tagTime(c.id) - 1.2, tagTime(c.id));
+    if (a && col < 1) chip(X + c.x, Y + c.y, c.L, c.id, c.text, a * (1 - col), 'center', 19, 1 - .4 * col);
+  });
+  withA(seg(t, 90.8, 91.4) * (1 - seg(t, 98.6, 99.4)), () => txt('→ Datasæt · Beskriv · Pivotér · Test', X - 470, Y + 222, 15, MUTED, { f: 'mono', al: 'center' }));
+  drawTags(t, ['O1', 'O2', 'T1']);
+}
+
+function drawMacro(t) {
+  if (t < 100.6) { drawTags(t, ['O3', 'T2']); return; }
+  PEST.forEach((p, i) => {
+    const u = seg(t, 101 + i * .22, 101.7 + i * .22); if (!u) return;
+    const a = p.a * Math.PI / 180; const x = C.x + 805 * Math.cos(a), y = C.y + 805 * Math.sin(a);
+    const act = i === 1 ? vis(t, 106.2, 121.6, .4, .8) : vis(t, p.on, p.on + 1.6, .3, .6);
+    const shown = seg(t, p.on, p.on + .5);
+    withA(u, () => {
+      if (act) glow(COOL, 30 * act);
+      txt(p.L, x, y - 34, 84, act ? '#ffffff' : COOL, { w: 700, al: 'center' }); noglow();
+      txt(p.word, x, y + 6, 30, INK, { w: 600, al: 'center' });
+    });
+    withA(shown * .9, () => p.f.forEach((s, j) => txt(s, x, y + 44 + j * 32, 27, MUTED, { f: 'body', it: true, al: 'center' })));
+  });
+  withA(seg(t, 101.4, 102.4), () => {
+    caps('Makro', C.x + 1730, C.y - 930, 34, COOL, { w: 600, al: 'right' });
+    txt('samfundet omkring branchen', C.x + 1730, C.y - 884, 36, MUTED, { f: 'body', it: true, al: 'right' });
+  });
+  withA(seg(t, 122.6, 123.4), () => {
+    txt('Tag kun det med, der rammer', C.x + 1730, C.y - 790, 42, INK, { f: 'body', w: 500, al: 'right' });
+    txt('branchen og har en konsekvens.', C.x + 1730, C.y - 740, 42, INK, { f: 'body', w: 500, al: 'right' });
+  });
+  // P-fund
+  const pa = seg(t, 104.6, 105.1), pc = seg(t, 105, 106);
+  if (pa && pc < 1) chip(C.x, C.y - 672, 'O', 'O3', 'Bilfrie zoner i 4 af 5 største byer', pa * (1 - pc), 'center', 28, 1 - .4 * pc);
+  drawE(t);
+  drawTags(t, ['O3', 'T2']);
+}
+
+// ---------- E · konjunkturvurdering ----------
+const SPARK = [
+  { n: 'BNP-vækst', c: '#7fb0f7', v: [2.3, 1.6, 2.0, 2.8, 1.5, -2.2, 6.8, 2.7, 1.9, 2.3, 2.9] },
+  { n: 'Ledighed', c: '#f3a065', v: [4.6, 4.2, 4.1, 3.9, 3.7, 4.6, 3.6, 2.5, 2.6, 2.9, 2.9] },
+  { n: 'Inflation', c: '#f07a7a', v: [0.5, 0.3, 1.1, 0.8, 0.8, 0.4, 1.9, 7.7, 3.3, 1.4, 2.0] },
+  { n: 'Betalingsbal.', c: '#62d18f', v: [8.2, 7.8, 7.9, 7.2, 8.5, 7.7, 9.0, 12.8, 9.6, 12.0, 11.0] },
+];
+function drawE(t) {
+  if (t < 107.6) return;
+  const ov = t < 122 ? 1 : t < 131 ? 1 - seg(t, 121.8, 122.6) : seg(t, 131, 132);
+  withA(ov, () => drawEPanel(t));
+}
+function drawEPanel(t) {
+  const px = 1060, py = 660, pw = 720, ph = 780;
+  const a = seg(t, 107.6, 108.6);
+  const veil = vis(t, 107.4, 122, .8, .8);
+  withA(veil * .82, () => { ctx.fillStyle = '#0b1219'; ctx.fillRect(-3000, -400, 6000, 3200); });
+  withA(a, () => {
+    line([[795, 640], [px, py + 40]], rgba(COOL, .6), 1.5, [4, 5]);
+    rr(px, py, pw, ph, 10); ctx.fillStyle = 'rgba(16,25,36,0.96)'; ctx.fill(); ctx.strokeStyle = rgba(COOL, .55); ctx.lineWidth = 1.6; ctx.stroke();
+    caps('E · Konjunkturvurdering', px + 32, py + 46, 16, COOL, { w: 600 });
+    txt('Hvor er dansk økonomi på vej hen?', px + 32, py + 92, 32, INK, { w: 650 });
+  });
+  // konjunkturbølgen
+  const cu = seg(t, 109.6, 111.6);
+  if (cu) {
+    const x0 = px + 40, x1 = px + pw - 40, yc = py + 192, amp = 44; const pts = [];
+    for (let i = 0; i <= 120 * cu; i++) { const u = i / 120; pts.push([lerp(x0, x1, u), yc - amp * Math.sin(u * Math.PI * 2.5)]); }
+    line([[x0, yc], [x1, yc]], 'rgba(200,214,232,0.18)', 1, [3, 5]);
+    if (pts.length > 1) { glow(COOL, 10); line(pts, COOL, 2.6); noglow(); }
+    withA(seg(t, 110.8, 111.6), () => {
+      txt('Højkonjunktur', lerp(x0, x1, .1), yc - amp - 14, 15, MUTED, { f: 'body', it: true, al: 'center' });
+      txt('Lavkonjunktur', lerp(x0, x1, .3), yc + amp + 26, 15, MUTED, { f: 'body', it: true, al: 'center' });
+      txt('Opsving', lerp(x0, x1, .4), yc - 10, 15, MUTED, { f: 'body', it: true, al: 'left' });
+      txt('Afmatning', lerp(x0, x1, .62), yc - 10, 15, MUTED, { f: 'body', it: true, al: 'left' });
+    });
+    const du = seg(t, 111, 113.2); if (du) {
+      const u = lerp(.02, .9, eio(du)); const x = lerp(x0, x1, u), y = yc - amp * Math.sin(u * Math.PI * 2.5);
+      glow('#ffffff', 16); circle(x, y, 8, '#ffffff'); noglow();
+      withA(seg(t, 112.8, 113.4), () => txt('Her?', x, y - 18, 17, INK, { w: 600, al: 'center' }));
+    }
+  }
+  // 1 aktuel status
+  if (t > 112.4) {
+    withA(seg(t, 112.4, 113), () => caps('1  Aktuel status · niveau mod 10-års gennemsnit', px + 32, py + 288, 13, MUTED, { w: 600 }));
+    SPARK.forEach((s, i) => {
+      const u = seg(t, 112.8 + i * .35, 113.8 + i * .35); if (!u) return;
+      const x = px + 32 + i * 167, y = py + 302, w = 155, h = 100;
+      withA(Math.min(1, u * 2), () => {
+        rr(x, y, w, h, 6); ctx.fillStyle = 'rgba(232,237,244,0.04)'; ctx.fill();
+        txt(s.n, x + 10, y + 22, 14, INK, { w: 600 });
+        const mn = Math.min(...s.v), mx = Math.max(...s.v), avg = s.v.reduce((p, c) => p + c, 0) / s.v.length;
+        const sy = v => y + 88 - (v - mn) / (mx - mn || 1) * 52, sx = j => x + 10 + j * (w - 20) / (s.v.length - 1);
+        line([[x + 10, sy(avg)], [x + w - 10, sy(avg)]], 'rgba(232,237,244,0.45)', 1, [3, 3]);
+        const n = Math.max(1, Math.round((s.v.length - 1) * u)); const pts = []; for (let j = 0; j <= n; j++) pts.push([sx(j), sy(s.v[j])]);
+        line(pts, s.c, 2.2);
+        if (u >= 1) { glow(s.c, 10); circle(sx(s.v.length - 1), sy(s.v[s.v.length - 1]), 4.5, s.c); noglow(); }
+      });
+    });
+  }
+  // 2 nærmeste fremtid
+  if (t > 115.6) {
+    withA(seg(t, 115.6, 116.2), () => caps('2  Nærmeste fremtid · forventninger', px + 32, py + 452, 13, MUTED, { w: 600 }));
+    [['Forbrugertillid', .38], ['Erhvervstillid', .55], ['Internationalt', .47]].forEach(([n, v], i) => {
+      const u = seg(t, 115.8 + i * .4, 116.6 + i * .4); if (!u) return;
+      const gx = px + 140 + i * 220, gy = py + 548;
+      withA(u, () => {
+        ctx.beginPath(); ctx.arc(gx, gy, 46, Math.PI, 0); ctx.strokeStyle = 'rgba(200,214,232,0.3)'; ctx.lineWidth = 8; ctx.stroke();
+        ctx.beginPath(); ctx.arc(gx, gy, 46, Math.PI, Math.PI + Math.PI * v * eout(u)); ctx.strokeStyle = '#d9c25c'; ctx.lineWidth = 8; ctx.stroke();
+        const ang = Math.PI + Math.PI * lerp(.5, v, eout(u)) + .05 * Math.sin(t * 3) * (1 - seg(t, 117.5, 118.5));
+        line([[gx, gy], [gx + 38 * Math.cos(ang), gy + 38 * Math.sin(ang)]], INK, 2.2); circle(gx, gy, 4, INK);
+        txt(n, gx, gy + 28, 15, INK, { w: 600, al: 'center' });
+      });
+    });
+  }
+  // 3 samlet vurdering
+  if (t > 118.4) {
+    withA(seg(t, 118.4, 119), () => caps('3  Samlet vurdering → betydning for virksomheden', px + 32, py + 626, 13, MUTED, { w: 600 }));
+    const ca = seg(t, 119.2, 119.8), cc = seg(t, 120.8, 121.8);
+    if (ca && cc < 1) chip(px + 32, py + 672, 'T', 'T2', 'Stigende rente: færre låner til dyre cykler', ca * (1 - cc), 'left', 21, 1 - .4 * cc);
+    withA(seg(t, 119.4, 120), () => txt('Kurverne er illustrationer. Brug de nyeste tal fra Danmarks Statistik.', px + 32, py + 750, 14, MUTED, { f: 'body', it: true }));
+  }
+}
+
+// ---------- overbliksetiketter ----------
+const LEVELS = [
+  { y: -1500, h: 'Anbefalinger', s: 'semestrets mål', c: GOLD, t: 16.6 },
+  { y: -910, h: 'TOWS', s: 'handlingsalternativer', c: INK, t: 17.4 },
+  { y: -300, h: 'SWOT', s: 'prioriterede fund', c: INK, t: 18.2 },
+  { y: 1050, h: 'Analyser', s: 'intern · mikro · makro', c: INK, t: 19.4 },
+];
+function drawLevels(t) {
+  const back = vis(t, 16.4, 25, .7, 1.2), fwd = vis(t, 131.4, 146, 1, 1);
+  const a = Math.max(back, fwd); if (!a) return;
+  LEVELS.forEach((l, i) => {
+    const la = back ? seg(t, l.t, l.t + .6) * back : fwd;
+    withA(la, () => {
+      txt(l.h, -1200, l.y + 10, 96, l.c, { w: 650, al: 'right' });
+      txt(l.s, -1200, l.y + 80, 60, MUTED, { f: 'body', it: true, al: 'right' });
+    });
+    if (i < LEVELS.length - 1) {
+      const n = LEVELS[i + 1]; const ya = l.y + 150, yb = n.y - 120;
+      const aa = back ? seg(t, n.t - .2, n.t + .4) * back : fwd;
+      withA(aa, () => {
+        const xm = -1420; line([[xm, ya], [xm, yb]], 'rgba(200,214,232,0.4)', 4);
+        if (back) { line([[xm - 22, yb - 30], [xm, yb], [xm + 22, yb - 30]], 'rgba(200,214,232,0.6)', 4); }
+        else { line([[xm - 22, ya + 30], [xm, ya], [xm + 22, ya + 30]], rgba(GOLD, .8), 4); }
+        txt(back ? 'kommer fra' : 'bliver til', xm - 34, (ya + yb) / 2 + 16, 46, back ? MUTED : GOLD, { f: 'body', it: true, al: 'right' });
+      });
+    }
+  });
+  // sprintmærker (kun forlæns)
+  withA(seg(t, 132.4, 133.4) * fwd, () => {
+    const sp = [
+      { y: -930, h: 'Sprint 4', s: 'TOWS: vurdér og vælg', c: INK },
+      { y: 760, h: 'Sprint 2', s: 'intern analyse → S og W', c: WARM },
+      { y: 1110, h: 'Sprint 3', s: 'kunder og marked → O og T', c: COOL },
+      { y: 1460, h: 'Sprint 4', s: 'PESTLE, konjunktur, 5 Forces → O og T', c: COOL },
+    ];
+    sp.forEach(s => { txt(s.h, 2000, s.y, 80, s.c, { w: 650 }); txt(s.s, 2000, s.y + 66, 54, MUTED, { f: 'body', it: true }); });
+  });
+}
+
+// ---------- 8 · fundene flyver op ----------
+function drawFlights(t) {
+  if (t < 133.4 || t > 146) return;
+  FLIGHT.forEach((id, i) => {
+    const t0 = 133.6 + i * .3, d = 1.7; const u = seg(t, t0, t0 + d); if (!u || u >= 1) return;
+    const p0 = TAGS[id](), p3 = spAnchor(id); const L = id[0];
+    const side = p0[0] > p3[0] ? 1 : -1; const p1 = [p0[0] + side * 500, p0[1] - 500], p2 = [p3[0] + side * 300, p3[1] + 700];
+    for (let k = 10; k >= 0; k--) {
+      const uu = eio(clamp(u - k * .022)); const p = bez(p0, p1, p2, p3, uu);
+      withA((1 - k / 11) * .9, () => { if (!k) glow(COL[L], 24); circle(p[0], p[1], k ? 14 - k : 22, COL[L]); noglow(); });
+    }
+  });
+  // fra SWOT til TOWS
+  TOWS.forEach((c, ci) => {
+    const t0 = 138.3 + ci * .4; const u = eio(seg(t, t0, t0 + 1)); if (!u) return;
+    const fade = 1 - seg(t, 143, 145);
+    const cell = TCELL[c.k]; const tgt = [cell.x + 195, cell.y + 140];
+    c.refs.forEach(id => withA(fade * (c.chosen ? 1 : .45), () => { glow(COL[id[0]], 14); curve(spAnchor(id), tgt, u, rgba(COL[id[0]], .9), 5, null, .5); noglow(); }));
+  });
+  // fra de valgte til anbefalingerne
+  TOWS.filter(c => c.chosen).forEach((c, ci) => {
+    const t0 = 140.4 + ci * .35; const u = eio(seg(t, t0, t0 + .9)); if (!u) return;
+    const cell = TCELL[c.k]; const fade = 1 - seg(t, 144, 146);
+    withA(fade, () => { glow(GOLD, 18); curve([cell.x + 195, cell.y + 10], [400, recLineY(c.rec) + 17], u, rgba(GOLD, .95), 6, null, .5); noglow(); });
+  });
+}
+
+// ---------- overlay ----------
+function sceneAt(t) { let i = 0; while (i < SCENES.length - 1 && t >= SCENES[i + 1].t) i++; return i; }
+function drawOverlay(t) {
+  withA(seg(t, 148.6, 150.2), () => {
+    const g2 = ctx.createLinearGradient(0, 560, 0, 700); g2.addColorStop(0, 'rgba(10,16,23,0)'); g2.addColorStop(1, 'rgba(10,16,23,0.97)');
+    ctx.fillStyle = g2; ctx.fillRect(0, 560, SW, 140); ctx.fillStyle = 'rgba(10,16,23,0.97)'; ctx.fillRect(0, 700, SW, 200);
+  });
+  const i = sceneAt(t), s = SCENES[i];
+  if (i < 8) {
+    caps(`${String(i + 1).padStart(2, '0')} · ${s.title}`, 44, 56, 15, INK, { w: 600 });
+    if (s.sub) txt(s.sub, 44, 82, 19, MUTED, { f: 'body', it: true });
+  }
+  // bundtekst
+  const sub = SUBS.find(x => t >= x[0] && t < x[1]);
+  const g = ctx.createLinearGradient(0, 720, 0, 900); g.addColorStop(0, 'rgba(8,13,19,0)'); g.addColorStop(1, 'rgba(8,13,19,0.78)');
+  ctx.fillStyle = g; ctx.fillRect(0, 720, SW, 180);
+  if (sub) {
+    const a = Math.min(seg(t, sub[0], sub[0] + .35), 1 - seg(t, sub[1] - .3, sub[1]));
+    withA(a, () => txt(sub[2], SW / 2, 846, 31, INK, { f: 'body', it: true, w: 400, al: 'center' }));
+  }
+  // slutbillede
+  withA(seg(t, 149.4, 150.6), () => {
+    caps('Semestret på ét kort', SW / 2, 664, 16, GOLD, { al: 'center', w: 600 });
+    txt('Fra data til anbefaling', SW / 2, 728, 60, INK, { w: 700, al: 'center' });
+  });
+  // tidslinje-hårstreg
+  ctx.fillStyle = 'rgba(232,237,244,0.10)'; ctx.fillRect(0, SH - 4, SW, 4);
+  ctx.fillStyle = rgba(GOLD, .8); ctx.fillRect(0, SH - 4, SW * t / DUR, 4);
+}
+
+// ---------- tegn ét billede ----------
+function render(c, t) {
+  ctx = c.getContext('2d'); K = c.width / SW;
+  ctx.setTransform(1, 0, 0, 1, 0, 0); noglow(); ctx.globalAlpha = 1;
+  const cam = camAt(t);
+  drawBG(cam);
+  ctx.setTransform(K * cam.z, 0, 0, K * cam.z, K * (SW / 2 - cam.x * cam.z), K * (SH / 2 - cam.y * cam.z));
+  drawSpine(t); drawLevels(t); drawRings(t); drawSwot(t); drawTows(t); drawRec(t); drawFlights(t);
+  ctx.setTransform(K, 0, 0, K, 0, 0);
+  drawOverlay(t);
+}
+
+// ---------- afspiller ----------
+const cv = document.getElementById('stage');
+const pp = document.getElementById('pp'), scrub = document.getElementById('scrub'), timeEl = document.getElementById('time');
+const big = document.getElementById('bigplay'), scenesEl = document.getElementById('scenes');
+let T = 144.2, playing = false, last = 0;
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+SCENES.forEach((s, i) => {
+  const b = document.createElement('button'); b.type = 'button';
+  b.innerHTML = `${String(i + 1).padStart(2, '0')} · ${fmt(s.t)}<b>${s.title}</b>`;
+  b.addEventListener('click', () => { T = s.t + .01; big.hidden = true; play(); });
+  scenesEl.appendChild(b);
+});
+function size() {
+  const r = cv.getBoundingClientRect(); const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const w = Math.max(320, Math.round(r.width * dpr)); if (cv.width !== w) { cv.width = w; cv.height = Math.round(w * 9 / 16); }
+}
+function ui() {
+  scrub.value = T; timeEl.textContent = `${fmt(T)} / ${fmt(DUR)}`;
+  pp.textContent = playing ? '❚❚' : '▶'; pp.setAttribute('aria-label', playing ? 'Pause' : 'Afspil');
+  const si = sceneAt(T); [...scenesEl.children].forEach((b, i) => b.classList.toggle('on', i === si));
+}
+function frame(now) {
+  if (playing) { T += Math.min(.1, (now - last) / 1000); if (T >= DUR) { T = DUR; playing = false; } }
+  last = now; size(); render(cv, T); ui();
+  if (playing) requestAnimationFrame(frame);
+}
+function play() { if (T >= DUR - .05) T = 0; playing = true; big.hidden = true; last = performance.now(); requestAnimationFrame(frame); }
+function pause() { playing = false; requestAnimationFrame(frame); }
+function toggle() { playing ? pause() : play(); }
+pp.addEventListener('click', toggle);
+cv.addEventListener('click', toggle);
+big.addEventListener('click', () => { T = 0; play(); });
+scrub.addEventListener('input', () => { T = +scrub.value; big.hidden = true; if (!playing) requestAnimationFrame(frame); });
+const jump = d => { const i = clamp(sceneAt(T) + d, 0, SCENES.length - 1); T = SCENES[i].t + .01; big.hidden = true; if (!playing) requestAnimationFrame(frame); };
+document.getElementById('prev').addEventListener('click', () => jump(-1));
+document.getElementById('next').addEventListener('click', () => jump(1));
+cv.addEventListener('keydown', e => {
+  if (e.key === ' ' || e.key === 'k') { e.preventDefault(); toggle(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); jump(1); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); jump(-1); }
+});
+window.addEventListener('resize', () => requestAnimationFrame(frame));
+
+// ---------- manuskript ----------
+const SCRIPT = [
+  { tc: '0:00–0:12', thumb: 8.6, title: 'Målet',
+    pic: 'Mørkt lysbord. Et gyldent lyspunkt tænder og folder sig ud til et kort: Strategiske anbefalinger · Cykelværket ApS. Tre anbefalinger skrives ind én ad gangen, hver med sit spor-mærke (SO · S1 + O2). Spørgsmålet “Men hvor kommer de fra?” toner frem under kortet.',
+    screen: ['Strategiske anbefalinger', '1 Vind erhvervskunderne med 10 års garanti', '2 Gør webshoppen til en styrke', '3 Tilbyd leasing, når renten stiger'],
+    sound: 'Dyb, varm tone når lyset tænder. Bløde tastetryk, mens linjerne skrives.',
+    point: 'Målet kommer først, så de studerende ved, hvad alt det andet er til for.' },
+  { tc: '0:12–0:24', thumb: 21.2, title: 'Sporet baglæns',
+    pic: 'Fra hvert spor-mærke falder en gylden tråd nedad. Kameraet følger trådene og zoomer helt ud. Kortet afsløres som en spøgelsesskitse: TOWS-gitteret, SWOT-felterne og tre ringe nederst. Til venstre står niveauerne med “kommer fra”-pile imellem.',
+    screen: ['Anbefalinger', 'kommer fra TOWS', 'kommer fra SWOT', 'kommer fra Analyser (intern · mikro · makro)'],
+    sound: 'Whoosh, der falder i tonehøjde. Et blødt klik, hver gang et niveau mærkes.',
+    point: 'Hele semestret på ét billede, før detaljerne kommer.' },
+  { tc: '0:24–0:38', thumb: 37.6, title: 'TOWS',
+    pic: 'Kameraet lander på TOWS. Id-mærkerne glider ind fra kanterne to og to (S1 + O2, W1 + O1, S3 + T2, W2 + T1), og et handlingsalternativ skrives i hvert felt. Under hvert kort tændes point på de fem kriterier. SO, WO og ST får guldkant. WT tones ned.',
+    screen: ['SO · Match', 'WO · Konvertering', 'ST · Mød truslen', 'WT · Reducering', 'Mål · Målgrupper, strategi og værdier · Ressourcer · Vægt · Sammenhæng'],
+    sound: 'Magnetisk klik, når to punkter mødes. Korte pip for hvert point. En akkord, når de valgte lyser op.',
+    point: 'Ikke alle alternativer bliver anbefalinger. Valget skal begrundes.' },
+  { tc: '0:38–0:52', thumb: 49.4, title: 'SWOT',
+    pic: 'Kameraet glider ned til SWOT. De fire felter tænder i hver sin farve, og punkterne S1–T2 popper ind. Akserne mærkes: internt = kan styres, eksternt = kan påvirkes. S2 og O3 tones ned, da de prioriteres lavt.',
+    screen: ['Positivt / Negativt', 'Internt · kan styres', 'Eksternt · kan påvirkes', 'Prioritér: præstation × vigtighed · sandsynlighed × konsekvens'],
+    sound: 'Fire toner, én pr. felt. En dæmpet lyd, når de lavt prioriterede punkter tones ned.',
+    point: 'SWOT er et sted, hvor man samler beviser, ikke et sted, man finder på ting.' },
+  { tc: '0:52–1:14', thumb: 70.2, title: 'Intern analyse',
+    pic: 'Hurtigt dyk ned gennem ringene til kernen, som gløder varmt. Golden Circle tegnes i midten som målestok. Seks modelfliser tænder én ad gangen rundt om den, i rækkefølgen BMC, VPC, Værdikæde, VRIO, Regnskab og Organisation. Fem af dem sender et fund ud (W1, S2, W2, S1, S3), som til sidst trækker sig sammen til et lille farvet mærke ved modellen.',
+    screen: ['Målestok: mission · vision · Golden Circle', 'BMC · W1 Webshop: 12 % af salget mod 35 %', 'VPC · S2 Holdbarhed scorer 4,8 mod 4,1', 'Værdikæde · W2 Leveringstid 6 uger mod 2', 'VRIO · S1 10 års garanti er svær at efterligne', 'Regnskab · S3 Soliditetsgrad 41 % mod 28 %'],
+    sound: 'En varm marimbatone pr. model. Et stempel og feltets tone, når et fund mærkes.',
+    point: 'Styrker og svagheder måles mod målene og mod konkurrenterne.' },
+  { tc: '1:14–1:40', thumb: 97.8, title: 'Mikro: kunder og marked',
+    pic: 'Kameraet trækker ud, og den inderste ring tænder køligt blå: Kunder til venstre, Marked til højre. Tre metodebadges i bunden. Desk research sender dokumenter op i begge halvdele. Interviews viser to talebobler. Spørgeskemaet drysser 20 prikker ind, og 14 bliver blå: 7 af 10. Til højre tegnes markedets vækstkurve og Porters 5 Forces.',
+    screen: ['Desk research (sekundær)', 'Kvalitativ · interviews', 'Kvantitativ · spørgeskema', 'O1 7 af 10 begynder købet online', 'O2 Erhvervsladcykler vokser 15 % om året', 'T1 Tysk konkurrent åbner showroom i Kbh.'],
+    sound: 'Papir, der bladres. Abstrakt mumlen til interviews. Små dråber, én pr. prik.',
+    point: 'Interviews svarer på hvorfor. Spørgeskemaet svarer på hvor mange. Prikkerne er de samme som i databehandlingsanimationen.' },
+  { tc: '1:40–2:10', thumb: 119.2, title: 'Makro: PESTLE og konjunktur',
+    pic: 'Kameraet trækker helt ud til den yderste ring, som deles i seks segmenter: P E S T L E. P tænder og sender O3 ud. Kameraet flyver til E, hvor et panel åbner: konjunkturbølgen med et “Her?”, fire sparklines mod 10-års gennemsnit (aktuel status: BNP, ledighed, inflation og betalingsbalance), tre måleure for forventningerne (nærmeste fremtid) og til sidst betydningen for virksomheden: T2. Tilbage i ringen tænder S, T, L og E med deres fokuspunkter.',
+    screen: ['E · Konjunkturvurdering', '1 Aktuel status · niveau mod 10-års gennemsnit', '2 Nærmeste fremtid · forventninger', '3 Samlet vurdering → betydning for virksomheden', 'T2 Stigende rente: færre låner til dyre cykler', 'Tag kun det med, der rammer branchen og har en konsekvens.'],
+    sound: 'Bred, rumlig pad. Ved E en langsom puls i takt med konjunkturbølgen.',
+    point: 'Konjunkturvurderingen ender ikke i økonomien. Den ender i virksomheden.' },
+  { tc: '2:10–2:25', thumb: 140.6, title: 'Sporet forlæns',
+    pic: 'Helt ude igen. Pilene til venstre vender og hedder nu “bliver til”. Fundene letter fra deres mærker som lyskugler med haler og lander på deres plads i SWOT. Derfra trækkes farvede streger til TOWS-felterne, og de tre valgte sender en guldstråle op til anbefalingerne. Sprintmærker til højre viser, hvornår hver del laves.',
+    screen: ['bliver til', 'Sprint 2 · intern analyse → S og W', 'Sprint 3 · kunder og marked → O og T', 'Sprint 4 · PESTLE, konjunktur, 5 Forces → O og T', 'Sprint 4 · TOWS: vurdér og vælg'],
+    sound: 'Musikken skifter fra mol til dur. Hvert fund spiller sin tone, når det lander, og til sidst klinger hele akkorden.',
+    point: 'Samme kæde, nu som årsag og virkning.' },
+  { tc: '2:25–2:34', thumb: 152, title: 'Slutbillede',
+    pic: 'Kameraet stiger op til anbefalingerne, som gløder. Titlen toner frem under kortet.',
+    screen: ['Semestret på ét kort', 'Fra data til anbefaling'],
+    sound: 'Akkorden klinger ud. Én klokke til sidst.',
+    point: 'Kan I ikke pege på, hvor et punkt kommer fra, er det et gæt.' },
+];
+const VO = [
+  'Til eksamen skal I give en virksomhed strategiske anbefalinger. Konkrete råd, den kan handle på. Men en anbefaling er kun så stærk som det, den bygger på.',
+  'Så lad os gå baglæns. Anbefalingerne kommer fra en TOWS. TOWS kommer fra en SWOT. Og SWOT’en bygger på jeres analyser, indefra og udefra.',
+  'I TOWS kobler I SWOT’ens punkter to og to. En styrke møder en mulighed: match. En svaghed vendes: konvertering. Hvert alternativ vurderes på fem kriterier. Kun de bedste bliver anbefalinger.',
+  'SWOT’en samler fundene fra analyserne. Det, virksomheden selv kan styre, er internt. Det, den kun kan påvirke, er eksternt. Og I prioriterer. Ikke alle fund er lige vigtige.',
+  'Først kigger I ind i virksomheden. Mission, vision og Golden Circle er målestokken. BMC og VPC viser, hvordan virksomheden skaber værdi, og for hvem. Værdikæden viser, hvor der er spild. VRIO finder de ressourcer, der er svære at kopiere. Regnskabsanalysen viser, om forretningen tjener penge.',
+  'Så kigger I ud. Først tæt på: kunderne og markedet. Desk research: det, andre allerede har undersøgt. Interviews giver dybde. De fortæller hvorfor. Spørgeskemaet giver tal. Det fortæller hvor mange. Markedsanalysen og Porters 5 Forces viser vækst, segmenter og konkurrence.',
+  'Længst ude ligger samfundet. PESTLE gennemgår seks områder. Under E laver I en konjunkturvurdering. Hvor står dansk økonomi nu, målt mod de sidste ti år? Hvad siger forventningerne om den nærmeste fremtid? Og vigtigst: Hvad betyder det for jeres virksomhed? Under de andre bogstaver tager I kun det med, der rammer branchen og har en konsekvens.',
+  'Nu går vi forlæns. Hvert fund får sin plads i SWOT’en. De vigtigste kobles i TOWS. De bedste alternativer bliver jeres anbefalinger.',
+  'Kan I ikke pege på, hvor et punkt kommer fra, er det et gæt. Semestrets opgave er at gøre gæt til dokumentation.',
+];
+const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const scriptEl = document.getElementById('script');
+const thumbs = [];
+SCRIPT.forEach((s, i) => {
+  const a = document.createElement('article'); a.className = 'scene'; a.id = 'scene-' + (i + 1);
+  a.innerHTML = `<div class="thumb"><canvas width="760" height="428" role="img" aria-label="Frame fra scene ${i + 1}: ${esc(s.title)}"></canvas>
+    <div class="tag"><span class="num">${String(i + 1).padStart(2, '0')}</span><h3>${esc(s.title)}</h3><span class="tc">${s.tc}</span></div></div>
+    <div class="body"><p class="vo">${esc(VO[i])}</p>
+    <div class="cols"><div><h4>Billede og bevægelse</h4><p>${esc(s.pic)}</p></div>
+    <div><h4>På skærmen</h4><ul>${s.screen.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>
+    <div><h4>Lyd</h4><p>${esc(s.sound)}</p></div></div>
+    <p class="pt"><b>Pointe:</b> ${esc(s.point)}</p></div>`;
+  const c = a.querySelector('canvas');
+  c.addEventListener('click', () => { T = SCENES[i].t + .01; big.hidden = true; document.getElementById('player').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); play(); });
+  thumbs.push([c, s.thumb]); scriptEl.appendChild(a);
+});
+function drawThumbs() { thumbs.forEach(([c, t]) => render(c, t)); }
+
+function start() { size(); render(cv, T); ui(); drawThumbs(); }
+start();
+if (document.fonts && document.fonts.load) {
+  Promise.all([
+    document.fonts.load('600 20px "Bricolage Grotesque"'), document.fonts.load('italic 400 20px Newsreader'),
+    document.fonts.load('400 20px Newsreader'), document.fonts.load('500 20px "IBM Plex Mono"'),
+  ]).then(() => start()).catch(() => {});
+}
+})();
+</script>
+<script>
+/* Fortæller siden udenom (fanen Overblik), hvor høj animationen er */
+(function(){
+  function send(){try{parent.postMessage({type:'fdta-height',h:Math.ceil(document.documentElement.scrollHeight)},'*');}catch(e){}}
+  if(window.ResizeObserver) new ResizeObserver(send).observe(document.body);
+  addEventListener('load',send); send();
+})();
+</script>
+</body>
+</html>

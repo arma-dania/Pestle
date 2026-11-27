@@ -83,6 +83,9 @@ section.panel:focus-visible{outline-offset:8px}
 @media(max-width:640px){.goals{grid-template-columns:1fr}.goals>div:first-child{border-right:0;border-bottom:1px solid var(--divider)}}
 
 .sec-title{font-size:26px;font-weight:600;letter-spacing:-.01em;margin:44px 0 12px}
+.chain{font-weight:500;letter-spacing:.04em;color:var(--muted);line-height:1.8}
+.chain b{color:var(--navy)}
+.anim-frame{display:block;width:100%;border:0;aspect-ratio:16/11;margin-top:16px;background:transparent}
 
 /* makromiljø-skiven */
 .disc{width:100%;max-width:330px;justify-self:center}
@@ -332,6 +335,14 @@ span.chipr{background:#fff;border-style:dashed}
   <div class="stack">
     <aside class="note"><p class="mono">Kort sagt</p><p>PESTLE står for <b>P</b>olitiske, <b>E</b>konomiske (økonomiske), <b>S</b>ociokulturelle, <b>T</b>eknologiske, <b>L</b>egale (juridiske) og <b>E</b>nvironmental (miljømæssige) forhold. Analysen giver dig de <b>muligheder og trusler</b>, du bagefter bruger i fx en SWOT. Værktøjet stammer fra Francis Aguilars "ETPS" fra 1967 og blev senere til PEST og PESTLE.</p></aside>
   </div>
+
+  <h3 class="sec-title">Fra data til anbefaling</h3>
+  <div class="stack" style="max-width:900px">
+    <p class="mono" style="color:var(--burgundy)">Animation · 2:34 · semestret på ét kort</p>
+    <p>Animationen viser, hvor PESTLE hører til i semestret. Den starter ved de strategiske anbefalinger og spørger hele vejen ned: Hvor kommer det fra? Derefter vender den retningen og viser, hvordan fundene fra analyserne bliver til SWOT-punkter, TOWS-alternativer og til sidst anbefalinger. PESTLE ligger yderst, i makromiljøet, og leverer muligheder og trusler.</p>
+    <p class="mono chain"><b>Data</b> → <b>Analyser</b> (intern · mikro · makro) → <b>SWOT</b> → <b>TOWS</b> → <b>Anbefalinger</b></p>
+  </div>
+  <iframe id="fdta" class="anim-frame" src="overblik/fra-data-til-anbefaling.html" title="Animation: Fra data til anbefaling" loading="lazy" allowfullscreen></iframe>
 
   <h3 class="sec-title">De seks faktorer</h3>
   <div class="factors" id="factors"></div>
@@ -651,6 +662,11 @@ dk.addEventListener('change',e=>{
   saveChecks();renderDK();
 });
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&dkOpen)closeDK();});
+// Animationen på Overblik fortæller selv, hvor høj den er
+addEventListener('message',e=>{
+  const f=document.getElementById('fdta');
+  if(f&&e.source===f.contentWindow&&e.data&&e.data.type==='fdta-height'){f.style.aspectRatio='auto';f.style.height=e.data.h+'px';}
+});
 renderDK();
 
 // SORTÉR

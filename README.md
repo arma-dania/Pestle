@@ -5,6 +5,7 @@ Interaktiv læringsside om PESTLE-analysen til Markedsføringsøkonom (AK) på E
 ## Indhold
 
 - **Overblik** – de seks faktorer (Politiske, Økonomiske, Sociokulturelle, Teknologiske, Legale, Miljømæssige) med "hvad hører til", spørgsmål, eksempler og typiske forvekslinger. Makromiljø-skiven øverst kan klikkes.
+  Under Overblik ligger også animationen *Fra data til anbefaling* (2:34), der viser, hvor PESTLE hører til i semestret: fra data over analyserne, SWOT og TOWS til strategiske anbefalinger. Den ligger i `overblik/fra-data-til-anbefaling.html` og vises i en iframe, der selv tilpasser sin højde.
 - **Sådan gør du** – seks trin til en god analyse og de typiske fejl.
 - **Sortér** – 12 forhold, der skal placeres under den rigtige faktor, med forklaring.
 - **Quiz** – 10 spørgsmål om formål, faktorer og sammenhængen med SWOT.
@@ -14,7 +15,7 @@ Interaktiv læringsside om PESTLE-analysen til Markedsføringsøkonom (AK) på E
 
 Det er én selvstændig `index.html` uden byggetrin. Åbn filen i en browser for at se den lokalt. Siden henter kun skrifttyperne fra Google Fonts.
 
-**Netlify:** Sitet udgives fra grenen `main`. `netlify.toml` kopierer `index.html` til `dist/` og udgiver den mappe, så Netlify skal ikke have andre indstillinger. Opsætning første gang: Netlify → Add new site → Import an existing project → GitHub → `arma-dania/Pestle` → Branch to deploy: `main` → Deploy. Herefter udgives hver push til `main` automatisk.
+**Netlify:** Sitet udgives fra grenen `main`. `netlify.toml` kopierer `index.html` og mappen `overblik/` til `dist/` og udgiver den mappe, så Netlify skal ikke have andre indstillinger. Opsætning første gang: Netlify → Add new site → Import an existing project → GitHub → `arma-dania/Pestle` → Branch to deploy: `main` → Deploy. Herefter udgives hver push til `main` automatisk.
 
 ## Design
 
