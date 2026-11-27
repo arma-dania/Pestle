@@ -12,7 +12,9 @@ Interaktiv læringsside om PESTLE-analysen til Markedsføringsøkonom (AK) på E
 
 ## Brug
 
-Det er én selvstændig `index.html` uden byggetrin. Åbn filen i en browser, eller slå GitHub Pages til for repoet (Settings → Pages → Deploy from a branch → vælg grenen med `index.html` og mappen `/ (root)`), så siden får en offentlig adresse. Siden henter kun skrifttyperne fra Google Fonts.
+Det er én selvstændig `index.html` uden byggetrin. Åbn filen i en browser for at se den lokalt. Siden henter kun skrifttyperne fra Google Fonts.
+
+**Netlify:** Sitet udgives fra grenen `main`. `netlify.toml` kopierer `index.html` til `dist/` og udgiver den mappe, så Netlify skal ikke have andre indstillinger. Opsætning første gang: Netlify → Add new site → Import an existing project → GitHub → `arma-dania/Pestle` → Branch to deploy: `main` → Deploy. Herefter udgives hver push til `main` automatisk.
 
 ## Design
 

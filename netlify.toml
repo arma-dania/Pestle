@@ -1,0 +1,5 @@
+# Netlify udgiver siden direkte fra main ved hver push. Der er intet byggetrin:
+# index.html er hele siden, så kun den lægges i dist.
+[build]
+  command = "mkdir -p dist && cp index.html dist/index.html"
+  publish = "dist"
