@@ -281,28 +281,17 @@ span.chipr{background:#fff;border-style:dashed}
       </button>
     </div>
     <div class="tablist" role="tablist" aria-label="Afsnit">
-      <button class="tab" role="tab" id="t-semester" aria-controls="semester" aria-selected="false" tabindex="-1"><span class="n">1</span>Semesteroverblik</button>
-      <button class="tab" role="tab" id="t-overblik" aria-controls="overblik" aria-selected="true"><span class="n">2</span>Overblik</button>
-      <button class="tab" role="tab" id="t-trin" aria-controls="trin" aria-selected="false" tabindex="-1"><span class="n">3</span>Sådan gør du</button>
-      <button class="tab" role="tab" id="t-sorter" aria-controls="sorter" aria-selected="false" tabindex="-1"><span class="n">4</span>Sortér</button>
-      <button class="tab" role="tab" id="t-quiz" aria-controls="quiz" aria-selected="false" tabindex="-1"><span class="n">5</span>Quiz</button>
-      <button class="tab" role="tab" id="t-ark" aria-controls="ark" aria-selected="false" tabindex="-1"><span class="n">6</span>Din analyse</button>
+      <button class="tab" role="tab" id="t-overblik" aria-controls="overblik" aria-selected="true"><span class="n">1</span>Overblik</button>
+      <button class="tab" role="tab" id="t-trin" aria-controls="trin" aria-selected="false" tabindex="-1"><span class="n">2</span>Sådan gør du</button>
+      <button class="tab" role="tab" id="t-sorter" aria-controls="sorter" aria-selected="false" tabindex="-1"><span class="n">3</span>Sortér</button>
+      <button class="tab" role="tab" id="t-quiz" aria-controls="quiz" aria-selected="false" tabindex="-1"><span class="n">4</span>Quiz</button>
+      <button class="tab" role="tab" id="t-ark" aria-controls="ark" aria-selected="false" tabindex="-1"><span class="n">5</span>Din analyse</button>
+      <button class="tab" role="tab" id="t-semester" aria-controls="semester" aria-selected="false" tabindex="-1"><span class="n">6</span>Semesteroverblik</button>
     </div>
   </div>
 </nav>
 
 <main class="container">
-<!-- SEMESTEROVERBLIK -->
-<section class="panel" id="semester" role="tabpanel" tabindex="0" aria-labelledby="t-semester" hidden>
-  <div class="ph"><p class="mono kicker">Animation · 2:34 · semestret på ét kort</p><h2>Fra data til anbefaling</h2></div>
-  <div class="stack" style="max-width:900px">
-    <p>Animationen viser, hvor PESTLE hører til i semestret. Den starter ved de strategiske anbefalinger og spørger hele vejen ned: Hvor kommer det fra? Derefter vender den retningen og viser, hvordan fundene fra analyserne bliver til SWOT-punkter, TOWS-alternativer og til sidst anbefalinger. PESTLE ligger yderst, i makromiljøet, og leverer muligheder og trusler.</p>
-    <p class="mono chain"><b>Data</b> → <b>Analyser</b> (intern · mikro · makro) → <b>SWOT</b> → <b>TOWS</b> → <b>Anbefalinger</b></p>
-  </div>
-  <iframe id="fdta" class="anim-frame" src="overblik/fra-data-til-anbefaling.html" title="Animation: Fra data til anbefaling" loading="lazy" allowfullscreen></iframe>
-
-</section>
-
 <!-- OVERBLIK -->
 <section class="panel" id="overblik" role="tabpanel" tabindex="0" aria-labelledby="t-overblik">
   <div class="hero">
@@ -424,6 +413,17 @@ span.chipr{background:#fff;border-style:dashed}
   <div class="row confirm" id="confirmclear" hidden><span id="confirmtext">Slet hele analysen?</span><button class="btn" id="yesclear" type="button">Ja, slet</button><button class="btn ghost" id="noclear" type="button">Fortryd</button></div>
   <p class="toast" id="toast" role="status"></p>
   <textarea id="copyfallback" hidden aria-label="Analysen som tekst – markér og kopiér"></textarea>
+</section>
+
+<!-- SEMESTEROVERBLIK -->
+<section class="panel" id="semester" role="tabpanel" tabindex="0" aria-labelledby="t-semester" hidden>
+  <div class="ph"><p class="mono kicker">Animation · 2:34 · semestret på ét kort</p><h2>Fra data til anbefaling</h2></div>
+  <div class="stack" style="max-width:900px">
+    <p>Animationen viser, hvor PESTLE hører til i semestret. Den starter ved de strategiske anbefalinger og spørger hele vejen ned: Hvor kommer det fra? Derefter vender den retningen og viser, hvordan fundene fra analyserne bliver til SWOT-punkter, TOWS-alternativer og til sidst anbefalinger. PESTLE ligger yderst, i makromiljøet, og leverer muligheder og trusler.</p>
+    <p class="mono chain"><b>Data</b> → <b>Analyser</b> (intern · mikro · makro) → <b>SWOT</b> → <b>TOWS</b> → <b>Anbefalinger</b></p>
+  </div>
+  <iframe id="fdta" class="anim-frame" src="overblik/fra-data-til-anbefaling.html" title="Animation: Fra data til anbefaling" loading="lazy" allowfullscreen></iframe>
+
 </section>
 
 <div class="pagenav" id="pagenav"></div>
