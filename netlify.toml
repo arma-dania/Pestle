@@ -1,5 +1,6 @@
 # Netlify udgiver siden direkte fra main ved hver push. Der er intet byggetrin:
 # index.html er siden, og overblik/ har animationen. Kun de to lægges i dist.
+# dist ryddes først: Netlify genbruger byggemappen, og ellers havner overblik/ i dist/overblik/overblik.
 [build]
-  command = "mkdir -p dist && cp index.html dist/index.html && cp -r overblik dist/overblik"
+  command = "rm -rf dist && mkdir -p dist && cp index.html dist/ && cp -r overblik dist/"
   publish = "dist"
